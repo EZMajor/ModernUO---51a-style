@@ -19,7 +19,10 @@ namespace Server.Spells.Seventh
 
         public override SpellCircle Circle => SpellCircle.Seventh;
 
-        public override bool DelayedDamage => true;
+        //Sphere-style edit: Use immediate damage in Sphere mode to sync with visual effects
+        public override bool DelayedDamage =>
+            !Systems.Combat.SphereStyle.SphereConfig.IsEnabled() ||
+            !Systems.Combat.SphereStyle.SphereConfig.ImmediateDamageApplication;
 
         public void Target(Mobile m)
         {

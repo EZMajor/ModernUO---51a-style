@@ -414,8 +414,23 @@ namespace Server.Spells
             }
 
             var wasCasting = IsCasting; // Copy SpellState before resetting it to none
+            var wasSequencing = (State == SpellState.Sequencing); // Check if target was already selected
             State = SpellState.None;
             Caster.Spell = null;
+
+            //Sphere-style edit: Show fizzle effects and consume reagents when interrupted after target selection
+            if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                wasSequencing && // Only if target was selected
+                type == DisturbType.NewCast)
+            {
+                DoFizzle();
+
+                // Consume reagents/scroll
+                if (Scroll is SpellScroll)
+                {
+                    Scroll.Consume();
+                }
+            }
 
             OnDisturb(type, wasCasting);
 
@@ -540,7 +555,24 @@ namespace Server.Spells
 
                 if (Caster.Mana >= requiredMana)
                 {
-                    if (Caster.Spell == null && Caster.CheckSpellCast(this) && CheckCast() &&
+                    //Sphere-style edit: In Sphere mode, allow casting new spell to cancel targeting phase
+                    var sphereImmediateTargetMode = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                                                   Systems.Combat.SphereStyle.SphereConfig.ImmediateSpellTarget;
+
+                    var canCast = Caster.Spell == null;
+
+                    // Sphere-style: If there's an active spell but target hasn't been selected yet, allow cancellation
+                    if (!canCast && sphereImmediateTargetMode && Caster.Spell is Spell currentSpell)
+                    {
+                        // Only allow cancellation if existing spell is still in Casting state (not Sequencing)
+                        if (currentSpell.State == SpellState.Casting)
+                        {
+                            currentSpell.Disturb(DisturbType.NewCast);
+                            canCast = true;
+                        }
+                    }
+
+                    if (canCast && Caster.CheckSpellCast(this) && CheckCast() &&
                         Caster.Region.OnBeginSpellCast(Caster, this))
                     {
                         State = SpellState.Casting;
@@ -593,10 +625,9 @@ namespace Server.Spells
                             }
                         }
 
-                        //Sphere-style edit: Don't clear hands in Sphere mode (weapons stay equipped)
-                        if (ClearHandsOnCast &&
-                            (!Systems.Combat.SphereStyle.SphereConfig.IsEnabled() ||
-                             Systems.Combat.SphereStyle.SphereConfig.ClearHandsOnCast))
+                        //Sphere-style edit: Don't clear hands during cast initiation in Sphere mode
+                        //Hands are cleared after target selection in CheckSequence() instead
+                        if (ClearHandsOnCast && !sphereImmediateTarget)
                         {
                             Caster.ClearHands();
                         }
@@ -829,20 +860,24 @@ namespace Server.Spells
                     Caster.RevealingAction();
                 }
 
+                //Sphere-style edit: Clear hands after target selection if configured
+                var sphereClearHands = !Systems.Combat.SphereStyle.SphereConfig.IsEnabled() ||
+                                      Systems.Combat.SphereStyle.SphereConfig.ClearHandsOnCast;
+
                 if (Scroll is BaseWand)
                 {
                     var m = Scroll.Movable;
 
                     Scroll.Movable = false;
 
-                    if (ClearHandsOnCast)
+                    if (ClearHandsOnCast && sphereClearHands)
                     {
                         Caster.ClearHands();
                     }
 
                     Scroll.Movable = m;
                 }
-                else if (ClearHandsOnCast)
+                else if (ClearHandsOnCast && sphereClearHands)
                 {
                     Caster.ClearHands();
                 }
@@ -1007,8 +1042,15 @@ namespace Server.Spells
                     m_Spell._castTimer = null;
                     caster.OnSpellCast(m_Spell);
                     caster.Region?.OnSpellCast(caster, m_Spell);
-                    caster.NextSpellTime =
-                        Core.TickCount + (int)m_Spell.GetCastRecovery().TotalMilliseconds; // Spell.NextSpellDelay;
+
+                    //Sphere-style edit: Use Sphere helper to get cast recovery (may be zero)
+                    var recovery = m_Spell.GetCastRecovery();
+                    if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
+                    {
+                        recovery = Systems.Combat.SphereStyle.SphereSpellHelper.GetCastRecovery(caster, m_Spell, recovery);
+                    }
+
+                    caster.NextSpellTime = Core.TickCount + (int)recovery.TotalMilliseconds;
 
                     caster.Delta(MobileDelta.Flags); // Update paralyze
 
