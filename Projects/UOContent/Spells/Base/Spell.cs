@@ -27,6 +27,9 @@ namespace Server.Spells
         private AnimTimer _animTimer;
         private CastTimer _castTimer;
 
+        //Sphere-style edit: Store original cast delay for post-target casting
+        private TimeSpan _spherePostTargetDelay;
+
         public Spell(Mobile caster, Item scroll, SpellInfo info)
         {
             Caster = caster;
@@ -46,6 +49,9 @@ namespace Server.Spells
         public Item Scroll { get; }
 
         public long StartCastTime { get; private set; }
+
+        //Sphere-style edit: Expose post-target cast delay for SpellTarget
+        public TimeSpan SpherePostTargetDelay => _spherePostTargetDelay;
 
         public virtual SkillName CastSkill => SkillName.Magery;
         public virtual SkillName DamageSkill => SkillName.EvalInt;
@@ -549,13 +555,22 @@ namespace Server.Spells
                         var sphereImmediateTarget = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
                                                     Systems.Combat.SphereStyle.SphereConfig.ImmediateSpellTarget;
 
+                        // Calculate the cast delay first
+                        var originalCastDelay = GetCastDelay();
+
+                        //Sphere-style edit: Store original delay for post-target casting
+                        if (sphereImmediateTarget)
+                        {
+                            _spherePostTargetDelay = originalCastDelay;
+                        }
+
                         if (!sphereImmediateTarget)
                         {
                             // ModernUO default: Say mantra and start cast animation/delay
                             SayMantra();
                         }
 
-                        var castDelay = sphereImmediateTarget ? TimeSpan.Zero : GetCastDelay();
+                        var castDelay = sphereImmediateTarget ? TimeSpan.Zero : originalCastDelay;
 
                         if (!sphereImmediateTarget && ShowHandMovement && (Caster.Body.IsHuman || Caster.Player && Caster.Body.IsMonster))
                         {

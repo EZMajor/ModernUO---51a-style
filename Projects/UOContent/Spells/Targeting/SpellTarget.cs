@@ -58,8 +58,8 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
             Systems.Combat.SphereStyle.SphereConfig.CastDelayAfterTarget &&
             _spell is Spell spell)
         {
-            // Get the cast delay that would have been applied pre-target
-            var castDelay = spell.GetCastDelay();
+            // Get the stored cast delay from the spell
+            var castDelay = spell.SpherePostTargetDelay;
 
             if (castDelay > TimeSpan.Zero)
             {
@@ -82,7 +82,8 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
                 // Schedule the actual spell effect after the cast delay
                 Timer.StartTimer(castDelay, () =>
                 {
-                    if (from.Deleted || !from.Alive || spell.State != SpellState.Sequencing)
+                    //Sphere-style edit: Only check if caster is alive and spell exists
+                    if (from.Deleted || !from.Alive || from.Spell != spell)
                     {
                         return;
                     }
