@@ -98,7 +98,7 @@ public static class MobileExtensions
     /// <summary>
     /// Begins a spell cast using Sphere rules.
     /// </summary>
-    public static void SphereBeginSpellCast(this Mobile mobile, Spells.ISpell spell)
+    public static void SphereBeginSpellCast(this Mobile mobile, ISpell spell)
     {
         if (!SphereConfig.IsEnabled() || mobile == null)
             return;

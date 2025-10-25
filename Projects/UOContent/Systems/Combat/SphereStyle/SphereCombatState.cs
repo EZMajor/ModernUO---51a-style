@@ -297,7 +297,7 @@ public class SphereCombatState
             // Disturb the spell
             if (CurrentSpell is Spell spell)
             {
-                spell.Disturb(DisturbType.Action, false, false);
+                spell.Disturb(DisturbType.UseRequest, false, false);
             }
 
             EndSpellCast(false);

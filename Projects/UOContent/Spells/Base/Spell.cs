@@ -64,7 +64,9 @@ namespace Server.Spells
 
         public virtual bool BlockedByHorrificBeast => true;
         public virtual bool BlockedByAnimalForm => true;
-        public virtual bool BlocksMovement => IsCasting;
+        //Sphere-style edit: Allow movement during casting if configured
+        public virtual bool BlocksMovement =>
+            Systems.Combat.SphereStyle.SphereSpellHelper.CheckBlocksMovement(Caster, this, IsCasting);
 
         public virtual bool CheckNextSpellTime => Scroll is not BaseWand;
 
@@ -463,9 +465,27 @@ namespace Server.Spells
         {
             StartCastTime = Core.TickCount;
 
-            if (Core.AOS && Caster.Spell is Spell spell && spell.State == SpellState.Sequencing)
+            //Sphere-style edit: Interrupt existing spell if new spell/wand is used
+            if (Caster.Spell is Spell existingSpell)
             {
-                spell.Disturb(DisturbType.NewCast);
+                if (existingSpell.State == SpellState.Sequencing)
+                {
+                    // ModernUO default behavior: disturb sequencing spells
+                    if (Core.AOS)
+                    {
+                        existingSpell.Disturb(DisturbType.NewCast);
+                    }
+                }
+                else if (existingSpell.IsCasting)
+                {
+                    // Sphere-style: new spell/wand interrupts existing cast
+                    if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                        (Systems.Combat.SphereStyle.SphereConfig.WandCancelActions && Scroll is BaseWand ||
+                         Systems.Combat.SphereStyle.SphereConfig.SwingCancelSpell))
+                    {
+                        existingSpell.Disturb(DisturbType.NewCast);
+                    }
+                }
             }
 
             if (!Caster.CheckAlive())
@@ -525,11 +545,19 @@ namespace Server.Spells
                             Caster.RevealingAction();
                         }
 
-                        SayMantra();
+                        //Sphere-style edit: Check if immediate targeting is enabled
+                        var sphereImmediateTarget = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                                                    Systems.Combat.SphereStyle.SphereConfig.ImmediateSpellTarget;
 
-                        var castDelay = GetCastDelay();
+                        if (!sphereImmediateTarget)
+                        {
+                            // ModernUO default: Say mantra and start cast animation/delay
+                            SayMantra();
+                        }
 
-                        if (ShowHandMovement && (Caster.Body.IsHuman || Caster.Player && Caster.Body.IsMonster))
+                        var castDelay = sphereImmediateTarget ? TimeSpan.Zero : GetCastDelay();
+
+                        if (!sphereImmediateTarget && ShowHandMovement && (Caster.Body.IsHuman || Caster.Player && Caster.Body.IsMonster))
                         {
                             var count = (int)Math.Ceiling(castDelay.TotalSeconds / AnimateDelay.TotalSeconds);
 
@@ -560,7 +588,12 @@ namespace Server.Spells
                             WeaponAbility.ClearCurrentAbility(Caster);
                         }
 
-                        Caster.Delta(MobileDelta.Flags); // Start paralyze
+                        //Sphere-style edit: Don't paralyze if movement allowed during cast
+                        if (!sphereImmediateTarget ||
+                            !Systems.Combat.SphereStyle.SphereConfig.AllowMovementDuringCast)
+                        {
+                            Caster.Delta(MobileDelta.Flags); // Start paralyze
+                        }
 
                         _castTimer = new CastTimer(this, castDelay);
                         // m_CastTimer.Start();

@@ -472,6 +472,14 @@ public class BandageContext : Timer
         }
         else if (healer.CanBeBeneficial(patient, true, true))
         {
+            //Sphere-style edit: Bandaging cancels active spell cast
+            if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                Systems.Combat.SphereStyle.SphereConfig.BandageCancelActions &&
+                healer.Spell is Spells.Spell spell)
+            {
+                spell.Disturb(Spells.DisturbType.UseRequest);
+            }
+
             healer.DoBeneficial(patient);
 
             var onSelf = healer == patient;

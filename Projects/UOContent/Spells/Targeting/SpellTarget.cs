@@ -1,3 +1,4 @@
+using System;
 using Server.Targeting;
 
 namespace Server.Spells;
@@ -46,7 +47,56 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
         from.SendLocalizedMessage(500237); // Target can not be seen.
     }
 
-    protected override void OnTarget(Mobile from, object o) => _spell.Target(o as T);
+    //Sphere-style edit: Handle post-target cast delay
+    protected override void OnTarget(Mobile from, object o)
+    {
+        var target = o as T;
+
+        // Check if Sphere-style immediate targeting with post-target delay is enabled
+        if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+            Systems.Combat.SphereStyle.SphereConfig.ImmediateSpellTarget &&
+            Systems.Combat.SphereStyle.SphereConfig.CastDelayAfterTarget &&
+            _spell is Spell spell)
+        {
+            // Get the cast delay that would have been applied pre-target
+            var castDelay = spell.GetCastDelay();
+
+            if (castDelay > TimeSpan.Zero)
+            {
+                // Start cast animations and delay
+                spell.SayMantra();
+
+                if (spell.ShowHandMovement && (from.Body.IsHuman || from.Player && from.Body.IsMonster))
+                {
+                    if (spell.Info.LeftHandEffect > 0)
+                    {
+                        from.FixedParticles(0, 10, 5, spell.Info.LeftHandEffect, EffectLayer.LeftHand);
+                    }
+
+                    if (spell.Info.RightHandEffect > 0)
+                    {
+                        from.FixedParticles(0, 10, 5, spell.Info.RightHandEffect, EffectLayer.RightHand);
+                    }
+                }
+
+                // Schedule the actual spell effect after the cast delay
+                Timer.StartTimer(castDelay, () =>
+                {
+                    if (from.Deleted || !from.Alive || spell.State != SpellState.Sequencing)
+                    {
+                        return;
+                    }
+
+                    _spell.Target(target);
+                });
+
+                return;
+            }
+        }
+
+        // Default behavior: immediate effect
+        _spell.Target(target);
+    }
 
     protected override void OnTargetOutOfLOS(Mobile from, object o)
     {
