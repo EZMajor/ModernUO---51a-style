@@ -58,16 +58,32 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
             Systems.Combat.SphereStyle.SphereConfig.CastDelayAfterTarget &&
             _spell is Spell spell)
         {
+            //Sphere-style edit: Cancel any OTHER active spells before casting this one
+            // This allows pre-selecting spells/scrolls but only cancels when target is selected
+            if (from.Spell != spell && from.Spell is Spell otherSpell)
+            {
+                // Cancel the other spell (could be in Casting/targeting or Sequencing/countdown state)
+                otherSpell.Disturb(DisturbType.NewCast);
+            }
+
+            //Sphere-style edit: NOW the spell is actually being cast (target selected)
+            // Notify Sphere system of cast begin (cancels bandage/swing) - do this FIRST before anything else
+            Systems.Combat.SphereStyle.SphereSpellHelper.OnCastBegin(from, spell);
+
+            //Sphere-style edit: Clear hands after target selection (always in Sphere mode)
+            // In Sphere 0.51a, weapons drop to backpack when spell is cast (target selected)
+            if (spell.ClearHandsOnCast)
+            {
+                from.ClearHands();
+            }
+
             // Get the stored cast delay from the spell
             var castDelay = spell.SpherePostTargetDelay;
 
             if (castDelay > TimeSpan.Zero)
             {
-                //Sphere-style edit: Notify Sphere system we're entering cast delay phase
-                if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
-                {
-                    Systems.Combat.SphereStyle.SphereSpellHelper.OnEnterCastDelay(from);
-                }
+                //Sphere-style edit: Entering cast delay phase (post-target, pre-effect)
+                Systems.Combat.SphereStyle.SphereSpellHelper.OnEnterCastDelay(from);
 
                 // Start cast animations and delay
                 spell.SayMantra();
@@ -121,9 +137,17 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
                 // Don't finish sequence yet - wait for timer
                 return;
             }
+            else
+            {
+                // Sphere mode with zero cast delay (e.g., some scrolls)
+                // Execute immediately but FinishSequence is called by OnTargetFinish
+                _spell.Target(target);
+                return;
+            }
         }
 
         // Default behavior: immediate effect (FinishSequence called by OnTargetFinish)
+        // For non-Sphere or non-immediate-target mode, hands are already cleared in Cast()
         _spell.Target(target);
     }
 

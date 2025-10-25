@@ -9,6 +9,7 @@ using Server.Spells.Necromancy;
 using Server.Spells.Ninjitsu;
 using Server.Spells.Second;
 using Server.Spells.Spellweaving;
+using Server.Systems.Combat.SphereStyle;
 using Server.Targeting;
 
 namespace Server.Spells
@@ -419,14 +420,16 @@ namespace Server.Spells
                 return;
             }
 
-            var wasCasting = IsCasting; // Copy SpellState before resetting it to none
+            var wasCasting = IsCasting; // Casting state (targeting)
+            var wasSequencing = State == SpellState.Sequencing; // Sequencing state (post-target countdown)
             var wasInCastDelay = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
                                 Caster.SphereIsInCastDelay(); // Check if in post-target cast delay
             State = SpellState.None;
             Caster.Spell = null;
 
-            //Sphere-style edit: Show fizzle effects and consume resources when interrupted during cast delay
-            if (wasInCastDelay && type == DisturbType.NewCast)
+            //Sphere-style edit: Show fizzle effects and consume resources when interrupted
+            // This handles Casting (targeting), Sequencing (countdown), and CastDelay (post-target anim) states
+            if ((wasCasting || wasSequencing || wasInCastDelay) && type == DisturbType.NewCast)
             {
                 DoFizzle();
 
@@ -497,6 +500,7 @@ namespace Server.Spells
 
         public virtual void SayMantra()
         {
+            //Sphere-style edit: Only wands skip mantra, scrolls should show it
             if (Scroll is BaseWand)
             {
                 return;
@@ -511,36 +515,6 @@ namespace Server.Spells
         public bool Cast()
         {
             StartCastTime = Core.TickCount;
-
-            //Sphere-style edit: Interrupt existing spell if new spell/wand/scroll is used
-            if (Caster.Spell is Spell existingSpell)
-            {
-                if (existingSpell.State == SpellState.Sequencing)
-                {
-                    // ModernUO default behavior: disturb sequencing spells
-                    if (Core.AOS)
-                    {
-                        existingSpell.Disturb(DisturbType.NewCast);
-                    }
-                }
-                else if (existingSpell.IsCasting)
-                {
-                    // Sphere-style: new spell/scroll/wand interrupts existing cast
-                    if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
-                    {
-                        // Always disturb if using wand and wands cancel actions
-                        if (Scroll is BaseWand && Systems.Combat.SphereStyle.SphereConfig.WandCancelActions)
-                        {
-                            existingSpell.Disturb(DisturbType.NewCast);
-                        }
-                        // Always disturb if casting new spell/scroll (not wand)
-                        else if (Scroll is not BaseWand)
-                        {
-                            existingSpell.Disturb(DisturbType.NewCast);
-                        }
-                    }
-                }
-            }
 
             if (!Caster.CheckAlive())
             {
@@ -588,24 +562,20 @@ namespace Server.Spells
 
                 if (Caster.Mana >= requiredMana)
                 {
-                    //Sphere-style edit: In Sphere mode, allow casting new spell to cancel targeting phase
+                    //Sphere-style edit: In immediate target mode, allow multiple spells in Casting state
+                    // The active spell will be canceled when target is selected for the new one
                     var sphereImmediateTargetMode = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
                                                    Systems.Combat.SphereStyle.SphereConfig.ImmediateSpellTarget;
 
-                    var canCast = Caster.Spell == null;
-
-                    // Sphere-style: If there's an active spell but target hasn't been selected yet, allow cancellation
-                    if (!canCast && sphereImmediateTargetMode && Caster.Spell is Spell currentSpell)
+                    // In immediate target mode, we don't cancel here - we just update Caster.Spell
+                    // The old spell's targeting cursor stays active until new spell target is selected
+                    if (Caster.Spell != null && !sphereImmediateTargetMode)
                     {
-                        // Only allow cancellation if existing spell is still in Casting state (not Sequencing)
-                        if (currentSpell.State == SpellState.Casting)
-                        {
-                            currentSpell.Disturb(DisturbType.NewCast);
-                            canCast = true;
-                        }
+                        // ModernUO default: can't cast if already casting
+                        return false;
                     }
 
-                    if (canCast && Caster.CheckSpellCast(this) && CheckCast() &&
+                    if (Caster.CheckSpellCast(this) && CheckCast() &&
                         Caster.Region.OnBeginSpellCast(Caster, this))
                     {
                         State = SpellState.Casting;
@@ -681,12 +651,6 @@ namespace Server.Spells
                         // m_CastTimer.Start();
 
                         OnBeginCast();
-
-                        //Sphere-style edit: Notify Sphere system of cast begin (cancels bandage/swing)
-                        if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
-                        {
-                            Systems.Combat.SphereStyle.SphereSpellHelper.OnCastBegin(Caster, this);
-                        }
 
                         if (castDelay > TimeSpan.Zero)
                         {
