@@ -530,6 +530,9 @@ namespace Server.Mobiles
             set => SetFlag(PlayerFlag.RefuseTrades, value);
         }
 
+        [CommandProperty(AccessLevel.GameMaster)]
+        public bool BetaTester { get; set; }
+
         public Dictionary<Type, int> RecoverableAmmo { get; set; }
 
         [CommandProperty(AccessLevel.GameMaster)]
