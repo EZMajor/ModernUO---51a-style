@@ -31,6 +31,9 @@ namespace Server.Spells
         //Sphere-style edit: Store original cast delay for post-target casting
         private TimeSpan _spherePostTargetDelay;
 
+        //Sphere-style edit: Track the spell this one replaced (for cancellation on target selection)
+        private Spell _replacedSpell;
+
         public Spell(Mobile caster, Item scroll, SpellInfo info)
         {
             Caster = caster;
@@ -53,6 +56,13 @@ namespace Server.Spells
 
         //Sphere-style edit: Expose post-target cast delay for SpellTarget
         public TimeSpan SpherePostTargetDelay => _spherePostTargetDelay;
+
+        //Sphere-style edit: Expose replaced spell for cancellation on target selection
+        public Spell ReplacedSpell
+        {
+            get => _replacedSpell;
+            set => _replacedSpell = value;
+        }
 
         public virtual SkillName CastSkill => SkillName.Magery;
         public virtual SkillName DamageSkill => SkillName.EvalInt;
@@ -579,6 +589,20 @@ namespace Server.Spells
                         Caster.Region.OnBeginSpellCast(Caster, this))
                     {
                         State = SpellState.Casting;
+
+                        //Sphere-style edit: Store the previous spell and cancel its target cursor
+                        if (sphereImmediateTargetMode && Caster.Spell is Spell previousSpell && previousSpell != this)
+                        {
+                            _replacedSpell = previousSpell;
+
+                            // Cancel the previous spell's target cursor (closes the UI targeting)
+                            // But don't disturb the spell yet - that happens on target selection
+                            if (Caster.Target != null)
+                            {
+                                Caster.Target.Cancel(Caster, TargetCancelType.Overridden);
+                            }
+                        }
+
                         Caster.Spell = this;
 
                         if (!isWand && RevealOnCast)

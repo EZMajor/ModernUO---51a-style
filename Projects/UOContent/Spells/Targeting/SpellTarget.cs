@@ -58,16 +58,22 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
             Systems.Combat.SphereStyle.SphereConfig.CastDelayAfterTarget &&
             _spell is Spell spell)
         {
-            //Sphere-style edit: Cancel any OTHER active spells before casting this one
-            // This allows pre-selecting spells/scrolls but only cancels when target is selected
-            if (from.Spell != spell && from.Spell is Spell otherSpell)
+            //Sphere-style edit: Set this spell as the active spell BEFORE canceling others
+            // This prevents Disturb() from clearing Caster.Spell and breaking the current cast
+            from.Spell = spell;
+
+            //Sphere-style edit: Cancel any spell that this one replaced when it was selected
+            // This handles the case where player queued Spell A, then Spell B, then selected target with B
+            // In that case, we stored A in B.ReplacedSpell, now we cancel A
+            if (spell.ReplacedSpell is Spell replacedSpell)
             {
-                // Cancel the other spell (could be in Casting/targeting or Sequencing/countdown state)
-                otherSpell.Disturb(DisturbType.NewCast);
+                // Cancel the spell that was replaced (fizzle, consume resources)
+                replacedSpell.Disturb(DisturbType.NewCast);
+                spell.ReplacedSpell = null; // Clear the reference
             }
 
             //Sphere-style edit: NOW the spell is actually being cast (target selected)
-            // Notify Sphere system of cast begin (cancels bandage/swing) - do this FIRST before anything else
+            // Notify Sphere system of cast begin (cancels bandage/swing)
             Systems.Combat.SphereStyle.SphereSpellHelper.OnCastBegin(from, spell);
 
             //Sphere-style edit: Clear hands after target selection (always in Sphere mode)
