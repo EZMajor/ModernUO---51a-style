@@ -85,17 +85,24 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
                     //Sphere-style edit: Only check if caster is alive and spell exists
                     if (from.Deleted || !from.Alive || from.Spell != spell)
                     {
+                        // Spell was interrupted, finish sequence
+                        _spell?.FinishSequence();
                         return;
                     }
 
+                    // Execute spell effect
                     _spell.Target(target);
+
+                    // Finish sequence after spell executes
+                    _spell?.FinishSequence();
                 });
 
+                // Don't finish sequence yet - wait for timer
                 return;
             }
         }
 
-        // Default behavior: immediate effect
+        // Default behavior: immediate effect (FinishSequence called by OnTargetFinish)
         _spell.Target(target);
     }
 
@@ -111,5 +118,20 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
         from.Target.BeginTimeout(from, TimeoutTime - Core.TickCount);
     }
 
-    protected override void OnTargetFinish(Mobile from) => _spell?.FinishSequence();
+    protected override void OnTargetFinish(Mobile from)
+    {
+        // Sphere-style edit: Don't finish sequence if using post-target delay
+        // The timer callback will handle finishing the sequence
+        if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+            Systems.Combat.SphereStyle.SphereConfig.ImmediateSpellTarget &&
+            Systems.Combat.SphereStyle.SphereConfig.CastDelayAfterTarget &&
+            _spell is Spell)
+        {
+            // Don't finish sequence - let timer handle it
+            return;
+        }
+
+        // Default behavior: finish sequence immediately
+        _spell?.FinishSequence();
+    }
 }
