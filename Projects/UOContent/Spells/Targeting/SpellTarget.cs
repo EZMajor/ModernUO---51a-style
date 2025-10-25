@@ -63,6 +63,12 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
 
             if (castDelay > TimeSpan.Zero)
             {
+                //Sphere-style edit: Notify Sphere system we're entering cast delay phase
+                if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
+                {
+                    Systems.Combat.SphereStyle.SphereSpellHelper.OnEnterCastDelay(from);
+                }
+
                 // Start cast animations and delay
                 spell.SayMantra();
 

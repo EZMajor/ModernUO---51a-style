@@ -154,6 +154,12 @@ namespace Server.Spells
                 Caster.Spell = null;
             }
 
+            //Sphere-style edit: Clear casting flags when spell finishes
+            if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
+            {
+                Caster.SphereEndSpellCast(true);
+            }
+
             Caster.Delta(MobileDelta.Flags); // Remove paralyze
         }
 
@@ -414,22 +420,42 @@ namespace Server.Spells
             }
 
             var wasCasting = IsCasting; // Copy SpellState before resetting it to none
-            var wasSequencing = (State == SpellState.Sequencing); // Check if target was already selected
+            var wasInCastDelay = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                                Caster.SphereIsInCastDelay(); // Check if in post-target cast delay
             State = SpellState.None;
             Caster.Spell = null;
 
-            //Sphere-style edit: Show fizzle effects and consume reagents when interrupted after target selection
-            if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
-                wasSequencing && // Only if target was selected
-                type == DisturbType.NewCast)
+            //Sphere-style edit: Show fizzle effects and consume resources when interrupted during cast delay
+            if (wasInCastDelay && type == DisturbType.NewCast)
             {
                 DoFizzle();
 
-                // Consume reagents/scroll
-                if (Scroll is SpellScroll)
+                // Consume mana (deduct what would have been used)
+                var requiredMana = ScaleMana(GetMana());
+                if (Caster.Mana >= requiredMana)
+                {
+                    Caster.Mana -= requiredMana;
+                }
+
+                // Consume reagents from spellbook
+                if (Scroll == null)
+                {
+                    if (Caster.Backpack != null)
+                    {
+                        ConsumeReagents();
+                    }
+                }
+                // Consume scroll
+                else if (Scroll is SpellScroll)
                 {
                     Scroll.Consume();
                 }
+            }
+
+            //Sphere-style edit: Clear IsInCastDelay flag
+            if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
+            {
+                Caster.SphereEndSpellCast(false);
             }
 
             OnDisturb(type, wasCasting);
@@ -486,7 +512,7 @@ namespace Server.Spells
         {
             StartCastTime = Core.TickCount;
 
-            //Sphere-style edit: Interrupt existing spell if new spell/wand is used
+            //Sphere-style edit: Interrupt existing spell if new spell/wand/scroll is used
             if (Caster.Spell is Spell existingSpell)
             {
                 if (existingSpell.State == SpellState.Sequencing)
@@ -499,12 +525,19 @@ namespace Server.Spells
                 }
                 else if (existingSpell.IsCasting)
                 {
-                    // Sphere-style: new spell/wand interrupts existing cast
-                    if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
-                        (Systems.Combat.SphereStyle.SphereConfig.WandCancelActions && Scroll is BaseWand ||
-                         Systems.Combat.SphereStyle.SphereConfig.SwingCancelSpell))
+                    // Sphere-style: new spell/scroll/wand interrupts existing cast
+                    if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
                     {
-                        existingSpell.Disturb(DisturbType.NewCast);
+                        // Always disturb if using wand and wands cancel actions
+                        if (Scroll is BaseWand && Systems.Combat.SphereStyle.SphereConfig.WandCancelActions)
+                        {
+                            existingSpell.Disturb(DisturbType.NewCast);
+                        }
+                        // Always disturb if casting new spell/scroll (not wand)
+                        else if (Scroll is not BaseWand)
+                        {
+                            existingSpell.Disturb(DisturbType.NewCast);
+                        }
                     }
                 }
             }
