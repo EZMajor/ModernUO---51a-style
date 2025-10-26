@@ -58,6 +58,10 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
             Systems.Combat.SphereStyle.SphereConfig.CastDelayAfterTarget &&
             _spell is Spell spell)
         {
+            //Sphere-style edit: Mark that this spell has selected a target
+            // This is used to determine if fizzle should occur when replaced by another spell
+            spell.HasSelectedTarget = true;
+
             //Sphere-style edit: Set this spell as the active spell BEFORE canceling others
             // This prevents Disturb() from clearing Caster.Spell and breaking the current cast
             from.Spell = spell;
@@ -67,8 +71,19 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
             // In that case, we stored A in B.ReplacedSpell, now we cancel A
             if (spell.ReplacedSpell is Spell replacedSpell)
             {
-                // Cancel the spell that was replaced (fizzle, consume resources)
-                replacedSpell.Disturb(DisturbType.NewCast);
+                // Only fizzle the replaced spell if it had selected a target
+                // If it only showed cursor (no target selected), just cancel it silently
+                if (replacedSpell.HasSelectedTarget)
+                {
+                    // Target was selected: fizzle with resource consumption (animation, sound, mana/reagents/scroll)
+                    replacedSpell.Disturb(DisturbType.NewCast);
+                }
+                else
+                {
+                    // Only cursor shown: silent cancel without resource consumption
+                    replacedSpell.FinishSequence();
+                }
+
                 spell.ReplacedSpell = null; // Clear the reference
             }
 
@@ -125,10 +140,11 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
                 // Schedule the actual spell effect after the cast delay
                 Timer.StartTimer(castDelay, () =>
                 {
-                    //Sphere-style edit: Only check if caster is alive and spell exists
-                    if (from.Deleted || !from.Alive || from.Spell != spell)
+                    //Sphere-style edit: Only check if caster is valid, not if spell is still active
+                    // The spell will be explicitly disturbed if interrupted by another spell's target selection
+                    if (from.Deleted || !from.Alive)
                     {
-                        // Spell was interrupted, finish sequence
+                        // Caster invalid, finish sequence
                         _spell?.FinishSequence();
                         return;
                     }

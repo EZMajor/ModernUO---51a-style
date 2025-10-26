@@ -34,6 +34,10 @@ namespace Server.Spells
         //Sphere-style edit: Track the spell this one replaced (for cancellation on target selection)
         private Spell _replacedSpell;
 
+        //Sphere-style edit: Track if this spell has selected a target (vs just showing cursor)
+        // This is used to determine if fizzle should occur when replaced by another spell
+        private bool _hasSelectedTarget;
+
         public Spell(Mobile caster, Item scroll, SpellInfo info)
         {
             Caster = caster;
@@ -62,6 +66,15 @@ namespace Server.Spells
         {
             get => _replacedSpell;
             set => _replacedSpell = value;
+        }
+
+        //Sphere-style edit: Expose if this spell has selected a target
+        // True = target selected (will fizzle if interrupted)
+        // False = only cursor shown (silent cancel if interrupted)
+        public bool HasSelectedTarget
+        {
+            get => _hasSelectedTarget;
+            set => _hasSelectedTarget = value;
         }
 
         public virtual SkillName CastSkill => SkillName.Magery;
@@ -1057,7 +1070,12 @@ namespace Server.Spells
                     return;
                 }
 
-                if (m_Spell.State == SpellState.Casting && caster.Spell == m_Spell)
+                //Sphere-style edit: In immediate target mode, allow spell to show cursor even if replaced
+                // The spell will be fizzled later if the replacing spell's target is selected
+                var sphereImmediateTargetMode = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                                               Systems.Combat.SphereStyle.SphereConfig.ImmediateSpellTarget;
+
+                if (m_Spell.State == SpellState.Casting && (caster.Spell == m_Spell || sphereImmediateTargetMode))
                 {
                     m_Spell.State = SpellState.Sequencing;
                     m_Spell._castTimer = null;
