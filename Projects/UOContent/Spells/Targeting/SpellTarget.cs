@@ -58,16 +58,62 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
             Systems.Combat.SphereStyle.SphereConfig.CastDelayAfterTarget &&
             _spell is Spell spell)
         {
+            //Sphere-style edit: Mark that this spell has selected a target
+            // This is used to determine if fizzle should occur when replaced by another spell
+            spell.HasSelectedTarget = true;
+
+            //Sphere-style edit: Cancel any spell that this one replaced when it was selected
+            // This handles the case where player queued Spell A, then Spell B, then selected target with B
+            // In that case, we stored A in B.ReplacedSpell, now we cancel A
+            // NOTE: Do this BEFORE setting the new spell as active, because Disturb() clears Caster.Spell
+            if (spell.ReplacedSpell is Spell replacedSpell)
+            {
+                // Only fizzle the replaced spell if it had selected a target
+                // If it only showed cursor (no target selected), just cancel it silently
+                if (replacedSpell.HasSelectedTarget)
+                {
+                    // Target was selected: fizzle with resource consumption (animation, sound, mana/reagents/scroll)
+                    replacedSpell.Disturb(DisturbType.NewCast);
+                }
+                else
+                {
+                    // Only cursor shown: silent cancel without resource consumption
+                    replacedSpell.FinishSequence();
+                }
+
+                spell.ReplacedSpell = null; // Clear the reference
+            }
+
+            //Sphere-style edit: NOW set this spell as the active spell after canceling the replaced spell
+            // This prevents the replaced spell's Disturb() from clearing the new spell
+            from.Spell = spell;
+
+            //Sphere-style edit: NOW the spell is actually being cast (target selected)
+            // Notify Sphere system of cast begin (cancels bandage/swing)
+            Systems.Combat.SphereStyle.SphereSpellHelper.OnCastBegin(from, spell);
+
+            //Sphere-style edit: Clear hands after target selection (always in Sphere mode)
+            // In Sphere 0.51a, weapons drop to backpack when spell is cast (target selected)
+            if (spell.ClearHandsOnCast)
+            {
+                from.ClearHands();
+            }
+
             // Get the stored cast delay from the spell
             var castDelay = spell.SpherePostTargetDelay;
 
             if (castDelay > TimeSpan.Zero)
             {
+                //Sphere-style edit: Entering cast delay phase (post-target, pre-effect)
+                Systems.Combat.SphereStyle.SphereSpellHelper.OnEnterCastDelay(from);
+
                 // Start cast animations and delay
                 spell.SayMantra();
 
+                //Sphere-style edit: Add casting animation during post-target delay
                 if (spell.ShowHandMovement && (from.Body.IsHuman || from.Player && from.Body.IsMonster))
                 {
+                    // Play hand effects
                     if (spell.Info.LeftHandEffect > 0)
                     {
                         from.FixedParticles(0, 10, 5, spell.Info.LeftHandEffect, EffectLayer.LeftHand);
@@ -77,15 +123,29 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
                     {
                         from.FixedParticles(0, 10, 5, spell.Info.RightHandEffect, EffectLayer.RightHand);
                     }
+
+                    // Play casting animation
+                    if (!from.Mounted && spell.Info.Action >= 0)
+                    {
+                        if (from.Body.IsHuman)
+                        {
+                            from.Animate(spell.Info.Action, 7, 1, true, false, 0);
+                        }
+                        else if (from.Player && from.Body.IsMonster)
+                        {
+                            from.Animate(12, 7, 1, true, false, 0);
+                        }
+                    }
                 }
 
                 // Schedule the actual spell effect after the cast delay
                 Timer.StartTimer(castDelay, () =>
                 {
-                    //Sphere-style edit: Only check if caster is alive and spell exists
-                    if (from.Deleted || !from.Alive || from.Spell != spell)
+                    //Sphere-style edit: Only check if caster is valid, not if spell is still active
+                    // The spell will be explicitly disturbed if interrupted by another spell's target selection
+                    if (from.Deleted || !from.Alive)
                     {
-                        // Spell was interrupted, finish sequence
+                        // Caster invalid, finish sequence
                         _spell?.FinishSequence();
                         return;
                     }
@@ -100,9 +160,17 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
                 // Don't finish sequence yet - wait for timer
                 return;
             }
+            else
+            {
+                // Sphere mode with zero cast delay (e.g., some scrolls)
+                // Execute immediately but FinishSequence is called by OnTargetFinish
+                _spell.Target(target);
+                return;
+            }
         }
 
         // Default behavior: immediate effect (FinishSequence called by OnTargetFinish)
+        // For non-Sphere or non-immediate-target mode, hands are already cleared in Cast()
         _spell.Target(target);
     }
 

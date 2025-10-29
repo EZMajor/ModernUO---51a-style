@@ -9,6 +9,7 @@ using Server.Spells.Necromancy;
 using Server.Spells.Ninjitsu;
 using Server.Spells.Second;
 using Server.Spells.Spellweaving;
+using Server.Systems.Combat.SphereStyle;
 using Server.Targeting;
 
 namespace Server.Spells
@@ -29,6 +30,19 @@ namespace Server.Spells
 
         //Sphere-style edit: Store original cast delay for post-target casting
         private TimeSpan _spherePostTargetDelay;
+
+        //Sphere-style edit: Track the spell this one replaced (for cancellation on target selection)
+        private Spell _replacedSpell;
+
+        //Sphere-style edit: Track if this spell has selected a target (vs just showing cursor)
+        // This is used to determine if fizzle should occur when replaced by another spell
+        private bool _hasSelectedTarget;
+
+        //Phase 2: Track remaining mana to deduct on successful spell completion for dual mana deduction
+        private int _pendingManaDeduction;
+
+        //Sphere-style edit: Track if spell has already fizzled to prevent double fizzle effects
+        private bool _hasFizzled;
 
         public Spell(Mobile caster, Item scroll, SpellInfo info)
         {
@@ -52,6 +66,22 @@ namespace Server.Spells
 
         //Sphere-style edit: Expose post-target cast delay for SpellTarget
         public TimeSpan SpherePostTargetDelay => _spherePostTargetDelay;
+
+        //Sphere-style edit: Expose replaced spell for cancellation on target selection
+        public Spell ReplacedSpell
+        {
+            get => _replacedSpell;
+            set => _replacedSpell = value;
+        }
+
+        //Sphere-style edit: Expose if this spell has selected a target
+        // True = target selected (will fizzle if interrupted)
+        // False = only cursor shown (silent cancel if interrupted)
+        public bool HasSelectedTarget
+        {
+            get => _hasSelectedTarget;
+            set => _hasSelectedTarget = value;
+        }
 
         public virtual SkillName CastSkill => SkillName.Magery;
         public virtual SkillName DamageSkill => SkillName.EvalInt;
@@ -94,6 +124,22 @@ namespace Server.Spells
             // Confirm: Monsters and pets cannot be disturbed.
             if (Caster.Player && IsCasting)
             {
+                //Sphere-style edit: Respect damage-based fizzle configuration
+                // If RestrictedFizzleTriggers is enabled, only allow fizzle from specific actions
+                // Damage (DisturbType.Hurt) should not cause fizzle in restricted mode
+                if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                    Systems.Combat.SphereStyle.SphereConfig.RestrictedFizzleTriggers)
+                {
+                    return; // Don't fizzle on damage when restricted fizzle is enabled
+                }
+
+                //Sphere-style edit: Also check DamageBasedFizzle configuration
+                if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                    !Systems.Combat.SphereStyle.SphereConfig.DamageBasedFizzle)
+                {
+                    return; // Don't fizzle on damage if damage-based fizzle is disabled
+                }
+
                 var hasProtection = ProtectionSpell.Registry.TryGetValue(Caster, out var d);
                 if (!hasProtection || d < 1000 && d < Utility.Random(1000))
                 {
@@ -152,6 +198,12 @@ namespace Server.Spells
             if (Caster.Spell == this)
             {
                 Caster.Spell = null;
+            }
+
+            //Sphere-style edit: Clear casting flags when spell finishes
+            if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
+            {
+                Caster.SphereEndSpellCast(true);
             }
 
             Caster.Delta(MobileDelta.Flags); // Remove paralyze
@@ -381,6 +433,14 @@ namespace Server.Spells
 
         public virtual void DoFizzle()
         {
+            //Sphere-style edit: Prevent double fizzle when spell is interrupted multiple times
+            if (_hasFizzled)
+            {
+                return; // Already fizzled, don't show effect again
+            }
+
+            _hasFizzled = true;
+
             Caster.LocalOverheadMessage(MessageType.Regular, 0x3B2, 502632); // The spell fizzles.
 
             if (Caster.Player)
@@ -413,9 +473,59 @@ namespace Server.Spells
                 return;
             }
 
-            var wasCasting = IsCasting; // Copy SpellState before resetting it to none
+            var wasCasting = IsCasting; // Casting state (targeting)
+            var wasSequencing = State == SpellState.Sequencing; // Sequencing state (post-target countdown)
+            var wasInCastDelay = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                                Caster.SphereIsInCastDelay(); // Check if in post-target cast delay
             State = SpellState.None;
             Caster.Spell = null;
+
+            //Sphere-style edit: Check if fizzle should occur based on restricted fizzle triggers
+            var shouldFizzle = (wasCasting || wasSequencing || wasInCastDelay);
+            
+            if (shouldFizzle && Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                Systems.Combat.SphereStyle.SphereConfig.RestrictedFizzleTriggers)
+            {
+                // Sphere 0.51a restricted fizzle triggers:
+                // ALLOWED: NewCast (interrupted by another spell), Kill (caster dies)
+                // DISALLOWED: Hurt (damage), EquipRequest (equipment change), UseRequest (bandage/wand/potion use)
+                shouldFizzle = type == DisturbType.NewCast ||
+                              type == DisturbType.Kill;
+            }
+
+            //Sphere-style edit: Show fizzle effects and consume resources when interrupted
+            // This handles Casting (targeting), Sequencing (countdown), and CastDelay (post-target anim) states
+            if (shouldFizzle)
+            {
+                DoFizzle();
+
+                // Consume mana (deduct what would have been used)
+                var requiredMana = ScaleMana(GetMana());
+                if (Caster.Mana >= requiredMana)
+                {
+                    Caster.Mana -= requiredMana;
+                }
+
+                // Consume reagents from spellbook
+                if (Scroll == null)
+                {
+                    if (Caster.Backpack != null)
+                    {
+                        ConsumeReagents();
+                    }
+                }
+                // Consume scroll
+                else if (Scroll is SpellScroll)
+                {
+                    Scroll.Consume();
+                }
+            }
+
+            //Sphere-style edit: Clear IsInCastDelay flag
+            if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
+            {
+                Caster.SphereEndSpellCast(false);
+            }
 
             OnDisturb(type, wasCasting);
 
@@ -456,6 +566,7 @@ namespace Server.Spells
 
         public virtual void SayMantra()
         {
+            //Sphere-style edit: Only wands skip mantra, scrolls should show it
             if (Scroll is BaseWand)
             {
                 return;
@@ -470,29 +581,6 @@ namespace Server.Spells
         public bool Cast()
         {
             StartCastTime = Core.TickCount;
-
-            //Sphere-style edit: Interrupt existing spell if new spell/wand is used
-            if (Caster.Spell is Spell existingSpell)
-            {
-                if (existingSpell.State == SpellState.Sequencing)
-                {
-                    // ModernUO default behavior: disturb sequencing spells
-                    if (Core.AOS)
-                    {
-                        existingSpell.Disturb(DisturbType.NewCast);
-                    }
-                }
-                else if (existingSpell.IsCasting)
-                {
-                    // Sphere-style: new spell/wand interrupts existing cast
-                    if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
-                        (Systems.Combat.SphereStyle.SphereConfig.WandCancelActions && Scroll is BaseWand ||
-                         Systems.Combat.SphereStyle.SphereConfig.SwingCancelSpell))
-                    {
-                        existingSpell.Disturb(DisturbType.NewCast);
-                    }
-                }
-            }
 
             if (!Caster.CheckAlive())
             {
@@ -538,12 +626,57 @@ namespace Server.Spells
             {
                 var requiredMana = ScaleMana(GetMana());
 
-                if (Caster.Mana >= requiredMana)
+                //Sphere-style edit: In immediate target mode, allow multiple spells in Casting state
+                // The active spell will be canceled when target is selected for the new one
+                var sphereImmediateTargetMode = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                                               Systems.Combat.SphereStyle.SphereConfig.ImmediateSpellTarget;
+
+                //Sphere-style edit: In Sphere mode with immediate targeting, skip mana check at cast start
+                // Mana will be checked and consumed at CheckSequence (target confirmation)
+                if (!sphereImmediateTargetMode && Caster.Mana < requiredMana)
                 {
-                    if (Caster.Spell == null && Caster.CheckSpellCast(this) && CheckCast() &&
+                    if (Caster.NetState?.IsKRClient != true && Caster.NetState?.Version >= ClientVersion.Version70654)
+                    {
+                        // Insufficient mana. You must have at least ~1_MANA_REQUIREMENT~ Mana to use this spell.
+                        Caster.LocalOverheadMessage(MessageType.Regular, 0x22, 502625, requiredMana.ToString());
+                    }
+                    else
+                    {
+                        Caster.LocalOverheadMessage(MessageType.Regular, 0x22, 502625); // Insufficient mana
+                    }
+
+                    return false;
+                }
+
+                if (Caster.Mana >= requiredMana || sphereImmediateTargetMode)
+                {
+
+                    // In immediate target mode, we don't cancel here - we just update Caster.Spell
+                    // The old spell's targeting cursor stays active until new spell target is selected
+                    if (Caster.Spell != null && !sphereImmediateTargetMode)
+                    {
+                        // ModernUO default: can't cast if already casting
+                        return false;
+                    }
+
+                    if (Caster.CheckSpellCast(this) && CheckCast() &&
                         Caster.Region.OnBeginSpellCast(Caster, this))
                     {
                         State = SpellState.Casting;
+
+                        //Sphere-style edit: Store the previous spell and cancel its target cursor
+                        if (sphereImmediateTargetMode && Caster.Spell is Spell previousSpell && previousSpell != this)
+                        {
+                            _replacedSpell = previousSpell;
+
+                            // Cancel the previous spell's target cursor (closes the UI targeting)
+                            // But don't disturb the spell yet - that happens on target selection
+                            if (Caster.Target != null)
+                            {
+                                Caster.Target.Cancel(Caster, TargetCancelType.Overridden);
+                            }
+                        }
+
                         Caster.Spell = this;
 
                         if (!isWand && RevealOnCast)
@@ -593,7 +726,9 @@ namespace Server.Spells
                             }
                         }
 
-                        if (ClearHandsOnCast)
+                        //Sphere-style edit: Don't clear hands during cast initiation in Sphere mode
+                        //Hands are cleared after target selection in CheckSequence() instead
+                        if (ClearHandsOnCast && !sphereImmediateTarget)
                         {
                             Caster.ClearHands();
                         }
@@ -808,7 +943,36 @@ namespace Server.Spells
             }
             else if (CheckFizzle())
             {
-                Caster.Mana -= mana;
+                // Phase 2: Dual mana deduction system
+                // If TargetManaDeduction is enabled, split mana into partial + remaining
+                var sphereTargetMana = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                                      Systems.Combat.SphereStyle.SphereConfig.TargetManaDeduction;
+
+                if (sphereTargetMana && _pendingManaDeduction == 0)
+                {
+                    // First time spell is being cast - deduct partial mana now
+                    var partialPercent = Systems.Combat.SphereStyle.SphereConfig.PartialManaPercent;
+                    var partialMana = (mana * partialPercent) / 100;
+                    var remainingMana = mana - partialMana;
+
+                    Caster.Mana -= partialMana;
+                    _pendingManaDeduction = remainingMana;
+                }
+                else if (sphereTargetMana && _pendingManaDeduction > 0)
+                {
+                    // Spell is succeeding - deduct remaining mana now
+                    var remainingMana = _pendingManaDeduction;
+                    Caster.Mana -= remainingMana;
+                    _pendingManaDeduction = 0;
+                }
+                else
+                {
+                    // Standard behavior - deduct full mana
+                    Caster.Mana -= mana;
+                }
+
+                //Phase 2: Clear pending mana on successful cast (fizzle won't be called after this)
+                _pendingManaDeduction = 0;
 
                 if (Scroll is SpellScroll)
                 {
@@ -820,20 +984,24 @@ namespace Server.Spells
                     Caster.RevealingAction();
                 }
 
+                //Sphere-style edit: Clear hands after target selection if configured
+                var sphereClearHands = !Systems.Combat.SphereStyle.SphereConfig.IsEnabled() ||
+                                      Systems.Combat.SphereStyle.SphereConfig.ClearHandsOnCast;
+
                 if (Scroll is BaseWand)
                 {
                     var m = Scroll.Movable;
 
                     Scroll.Movable = false;
 
-                    if (ClearHandsOnCast)
+                    if (ClearHandsOnCast && sphereClearHands)
                     {
                         Caster.ClearHands();
                     }
 
                     Scroll.Movable = m;
                 }
-                else if (ClearHandsOnCast)
+                else if (ClearHandsOnCast && sphereClearHands)
                 {
                     Caster.ClearHands();
                 }
@@ -866,6 +1034,8 @@ namespace Server.Spells
             else
             {
                 DoFizzle();
+                //Phase 2: Clear pending mana deduction on fizzle
+                _pendingManaDeduction = 0;
             }
 
             return false;
@@ -992,14 +1162,26 @@ namespace Server.Spells
                     return;
                 }
 
-                if (m_Spell.State == SpellState.Casting && caster.Spell == m_Spell)
+                //Sphere-style edit: In immediate target mode, allow spell to show cursor even if replaced
+                // The spell will be fizzled later if the replacing spell's target is selected
+                var sphereImmediateTargetMode = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                                               Systems.Combat.SphereStyle.SphereConfig.ImmediateSpellTarget;
+
+                if (m_Spell.State == SpellState.Casting && (caster.Spell == m_Spell || sphereImmediateTargetMode))
                 {
                     m_Spell.State = SpellState.Sequencing;
                     m_Spell._castTimer = null;
                     caster.OnSpellCast(m_Spell);
                     caster.Region?.OnSpellCast(caster, m_Spell);
-                    caster.NextSpellTime =
-                        Core.TickCount + (int)m_Spell.GetCastRecovery().TotalMilliseconds; // Spell.NextSpellDelay;
+
+                    //Sphere-style edit: Use Sphere helper to get cast recovery (may be zero)
+                    var recovery = m_Spell.GetCastRecovery();
+                    if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
+                    {
+                        recovery = Systems.Combat.SphereStyle.SphereSpellHelper.GetCastRecovery(caster, m_Spell, recovery);
+                    }
+
+                    caster.NextSpellTime = Core.TickCount + (int)recovery.TotalMilliseconds;
 
                     caster.Delta(MobileDelta.Flags); // Update paralyze
 

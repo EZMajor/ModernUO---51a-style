@@ -2,10 +2,12 @@ using System.Collections.Generic;
 using ModernUO.CodeGeneratedEvents;
 using Server.Engines.BuffIcons;
 using Server.Mobiles;
+using Server.Targeting;
 
 namespace Server.Spells.Fifth
 {
-    public class MagicReflectSpell : MagerySpell
+    //Sphere-style edit: Converted to targeted spell to match Sphere 0.51a behavior
+    public class MagicReflectSpell : MagerySpell, ITargetingSpell<Mobile>
     {
         private static readonly SpellInfo _info = new(
             "Magic Reflection",
@@ -27,28 +29,20 @@ namespace Server.Spells.Fifth
 
         public override bool CheckCast()
         {
-            if (Core.AOS)
-            {
-                return true;
-            }
-
-            if (Caster.MagicDamageAbsorb > 0)
-            {
-                Caster.SendLocalizedMessage(1005559); // This spell is already in effect.
-                return false;
-            }
-
-            if (!Caster.CanBeginAction<DefensiveSpell>())
-            {
-                Caster.SendLocalizedMessage(1005385); // The spell will not adhere to you at this time.
-                return false;
-            }
-
+            //Sphere-style edit: Removed pre-cast checks, validation happens on target
             return true;
         }
 
-        public override void OnCast()
+        //Sphere-style edit: Implement ITargetingSpell<Mobile> interface
+        public void Target(Mobile target)
         {
+            //Sphere-style edit: Validate target is the caster or a party member
+            if (!Caster.CanBeBeneficial(target, false))
+            {
+                Caster.SendLocalizedMessage(1001018); // You cannot perform negative acts on your target.
+                return;
+            }
+
             if (Core.AOS)
             {
                 /* The magic reflection spell decreases the caster's physical resistance, while increasing the caster's elemental resistances.
@@ -59,24 +53,26 @@ namespace Server.Spells.Fifth
                  * even after dying, until you turn them off by casting them again.
                  */
 
-                if (CheckSequence())
+                if (CheckBSequence(target))
                 {
-                    if (_table.Remove(Caster, out var mods))
+                    if (_table.Remove(target, out var mods))
                     {
-                        Caster.PlaySound(0x1ED);
-                        Caster.FixedParticles(0x375A, 10, 15, 5037, EffectLayer.Waist);
+                        //Sphere-style edit: Apply effects to target, not caster
+                        target.PlaySound(0x1ED);
+                        target.FixedParticles(0x375A, 10, 15, 5037, EffectLayer.Waist);
 
                         for (var i = 0; i < mods.Length; ++i)
                         {
-                            Caster.RemoveResistanceMod(mods[i]);
+                            target.RemoveResistanceMod(mods[i]);
                         }
 
-                        (Caster as PlayerMobile)?.RemoveBuff(BuffIcon.MagicReflection);
+                        (target as PlayerMobile)?.RemoveBuff(BuffIcon.MagicReflection);
                     }
                     else
                     {
-                        Caster.PlaySound(0x1E9);
-                        Caster.FixedParticles(0x375A, 10, 15, 5037, EffectLayer.Waist);
+                        //Sphere-style edit: Apply effects to target, not caster
+                        target.PlaySound(0x1E9);
+                        target.FixedParticles(0x375A, 10, 15, 5037, EffectLayer.Waist);
 
                         var physiMod = -25 + (int)(Caster.Skills.Inscribe.Value / 20);
                         const int otherMod = 10;
@@ -90,16 +86,16 @@ namespace Server.Spells.Fifth
                             new ResistanceMod(ResistanceType.Energy, "EnergyResistMagicResist", otherMod)
                         ];
 
-                        _table[Caster] = mods;
+                        _table[target] = mods;
 
                         for (var i = 0; i < mods.Length; ++i)
                         {
-                            Caster.AddResistanceMod(mods[i]);
+                            target.AddResistanceMod(mods[i]);
                         }
 
                         var buffFormat = $"{physiMod}\t+{otherMod}\t+{otherMod}\t+{otherMod}\t+{otherMod}";
 
-                        (Caster as PlayerMobile)?.AddBuff(
+                        (target as PlayerMobile)?.AddBuff(
                             new BuffInfo(BuffIcon.MagicReflection, 1075817, args: buffFormat, retainThroughDeath: true)
                         );
                     }
@@ -107,25 +103,25 @@ namespace Server.Spells.Fifth
             }
             else
             {
-                if (Caster.MagicDamageAbsorb > 0)
+                if (target.MagicDamageAbsorb > 0)
                 {
                     Caster.SendLocalizedMessage(1005559); // This spell is already in effect.
                 }
-                else if (!Caster.CanBeginAction<DefensiveSpell>())
+                else if (!target.CanBeginAction<DefensiveSpell>())
                 {
                     Caster.SendLocalizedMessage(1005385); // The spell will not adhere to you at this time.
                 }
-                else if (CheckSequence())
+                else if (CheckBSequence(target))
                 {
-                    if (Caster.BeginAction<DefensiveSpell>())
+                    if (target.BeginAction<DefensiveSpell>())
                     {
                         var value = (int)(Caster.Skills.Magery.Value + Caster.Skills.Inscribe.Value);
                         value = (int)(8 + value / 200.0 * 7.0); // absorb from 8 to 15 "circles"
 
-                        Caster.MagicDamageAbsorb = value;
+                        target.MagicDamageAbsorb = value;
 
-                        Caster.FixedParticles(0x375A, 10, 15, 5037, EffectLayer.Waist);
-                        Caster.PlaySound(0x1E9);
+                        target.FixedParticles(0x375A, 10, 15, 5037, EffectLayer.Waist);
+                        target.PlaySound(0x1E9);
                     }
                     else
                     {
@@ -133,8 +129,12 @@ namespace Server.Spells.Fifth
                     }
                 }
             }
+        }
 
-            FinishSequence();
+        //Sphere-style edit: Add OnCast to create target cursor
+        public override void OnCast()
+        {
+            Caster.Target = new SpellTarget<Mobile>(this, TargetFlags.Beneficial);
         }
 
         [OnEvent(nameof(PlayerMobile.PlayerDeletedEvent))]

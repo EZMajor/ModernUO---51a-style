@@ -868,7 +868,15 @@ public abstract partial class BaseWeapon
 
             if (canSwing)
             {
-                canSwing = attacker.Spell is not Spell sp || !sp.IsCasting || !sp.BlocksMovement;
+                //Sphere-style edit: Use Sphere validation if enabled
+                if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
+                {
+                    canSwing = Systems.Combat.SphereStyle.SphereWeaponHelper.ValidateSwing(attacker, defender, canSwing);
+                }
+                else
+                {
+                    canSwing = attacker.Spell is not Spell sp || !sp.IsCasting || !sp.BlocksMovement;
+                }
             }
 
             if (canSwing)
@@ -885,6 +893,20 @@ public abstract partial class BaseWeapon
         if (canSwing && attacker.HarmfulCheck(defender))
         {
             attacker.DisruptiveAction();
+
+            //Sphere-style edit: Cancel active spell if swing cancels spell
+            if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                Systems.Combat.SphereStyle.SphereConfig.SwingCancelSpell &&
+                attacker.Spell is Spell spell)
+            {
+                spell.Disturb(Spells.DisturbType.UseRequest);
+            }
+
+            //Sphere-style edit: Notify Sphere system of swing begin
+            if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
+            {
+                Systems.Combat.SphereStyle.SphereWeaponHelper.OnSwingBegin(attacker);
+            }
 
             attacker.NetState?.SendSwing(attacker.Serial, defender.Serial);
 
@@ -922,7 +944,15 @@ public abstract partial class BaseWeapon
             }
         }
 
-        return GetDelay(attacker);
+        var delay = GetDelay(attacker);
+
+        //Sphere-style edit: Notify Sphere system of swing complete
+        if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() && canSwing)
+        {
+            Systems.Combat.SphereStyle.SphereWeaponHelper.OnSwingComplete(attacker, delay);
+        }
+
+        return delay;
     }
 
     public override void OnAfterDuped(Item newItem)

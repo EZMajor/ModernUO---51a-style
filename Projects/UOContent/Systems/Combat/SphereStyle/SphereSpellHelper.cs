@@ -65,6 +65,17 @@ public static class SphereSpellHelper
         if (!SphereConfig.IsEnabled())
             return;
 
+        //Sphere-style edit: Cancel active bandage if spell is being cast
+        if (SphereConfig.SpellCancelSwing) // Use same config as swing cancellation
+        {
+            var bandageContext = Items.BandageContext.GetContext(caster);
+            if (bandageContext != null)
+            {
+                bandageContext.StopHeal();
+                SphereConfig.DebugLog($"{caster.Name} - Bandage interrupted by spell cast");
+            }
+        }
+
         // Sphere-style edit: Begin spell cast (will cancel swing if configured)
         caster.SphereBeginSpellCast(spell);
 

@@ -25,12 +25,28 @@ Melee and ranged weapons use identical swing logic.
 
 2.2 Spellcasting
 
-Spell initiates immediately; target cursor appears without delay.
-Cast delay occurs between target selection and effect application.
-Movement permitted during cast delay.
-Fizzle triggers only after target selection when interrupted by defined actions.
-No post-cast recovery delay.
-Mana deduction occurs at target confirmation.
+**Casting Sequence:**
+1. Spell initiated → Target cursor appears immediately (no pre-target delay)
+2. Target selected → Power words spoken, casting animation begins
+3. Cast delay executes → Character performs casting animation with hand effects
+4. Cast completes → Spell effect applies to target
+
+**Timing Rules:**
+- Target cursor appears instantly when spell is cast (no initial delay)
+- Cast delay (power words + animation) occurs AFTER target selection
+- Movement permitted during entire cast sequence (no movement locks)
+- Mana deducted at target confirmation (before cast delay)
+- No post-cast recovery delay
+
+**Interruption:**
+- Fizzle triggers only after target selection when interrupted by defined actions
+- Damage does not interrupt casting (configurable)
+- Starting a new action (swing/bandage/wand) cancels active cast
+
+**Self-Cast vs Targeted Spells:**
+- Beneficial self-cast spells (Magic Reflect, Bless, etc.) require targeting self
+- All spells follow same sequence: cast → target → delay → effect
+- No auto-cast spells; all require target confirmation
 
 2.3 Item and Skill Interaction
 
@@ -44,7 +60,8 @@ All timers independent: NextSwingTime, NextSpellTime, NextBandageTime.
 No global cooldown or shared recovery logic.
 Interrupts handled per-action, not globally.
 Server authoritative on all timing.
-No animation or equip locks.
+No animation locks during casting (movement allowed).
+Weapons/shields remain equipped during spellcasting (no forced unequip).
 
 
 3. ModernUO Divergence Matrix
