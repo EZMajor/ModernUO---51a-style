@@ -41,6 +41,9 @@ namespace Server.Spells
         //Phase 2: Track remaining mana to deduct on successful spell completion for dual mana deduction
         private int _pendingManaDeduction;
 
+        //Sphere-style edit: Track if spell has already fizzled to prevent double fizzle effects
+        private bool _hasFizzled;
+
         public Spell(Mobile caster, Item scroll, SpellInfo info)
         {
             Caster = caster;
@@ -430,6 +433,14 @@ namespace Server.Spells
 
         public virtual void DoFizzle()
         {
+            //Sphere-style edit: Prevent double fizzle when spell is interrupted multiple times
+            if (_hasFizzled)
+            {
+                return; // Already fizzled, don't show effect again
+            }
+
+            _hasFizzled = true;
+
             Caster.LocalOverheadMessage(MessageType.Regular, 0x3B2, 502632); // The spell fizzles.
 
             if (Caster.Player)

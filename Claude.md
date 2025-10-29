@@ -163,6 +163,41 @@ Status: [PASS] Phase 3 complete and fully operational
 
 ---
 
+### [COMPLETE] PHASE 3.5: Double Fizzle Bug Fix
+
+**Duration:** ~30 minutes
+**Completed:** 10/29/2025 7:01 PM
+
+#### Issue Resolution:
+
+Fixed double fizzle effect display bug when casting spells from spellbooks in Sphere immediate target mode. When a spell was interrupted by selecting the target of another spell, the fizzle effect (message, particles, sound) was displayed twice.
+
+#### Root Cause:
+
+The DoFizzle() method in Spell.cs could be called multiple times on the same spell instance without protection. In SpellTarget.OnTarget(), when a new spell's target is selected, it calls Disturb() on the previously active spell, which triggers DoFizzle(). Without a guard mechanism, the method had no protection against being called again if the spell was disturbed a second time.
+
+#### Implementation:
+
+1. Added `_hasFizzled` flag to Spell class to track fizzle state
+2. Modified DoFizzle() to check flag before executing:
+   - If already fizzled, returns immediately without showing effect
+   - If first fizzle, sets flag and displays message/particles/sound
+
+#### Files Modified:
+
+- Projects/UOContent/Spells/Base/Spell.cs (2 changes)
+  - Added private bool _hasFizzled field
+  - Added guard check in DoFizzle() method
+
+#### Compilation Status:
+
+- [PASS] All 7 projects compile successfully
+- [PASS] No compilation errors or warnings
+
+Status: [PASS] Phase 3.5 double fizzle fix complete and operational
+
+---
+
 ### [PENDING] PHASE 4: Performance Optimization
 
 **Duration:** 3-4 days
@@ -368,10 +403,10 @@ SphereConfig.WandCancelActions                 // Wand cancels actions
 
 ## Last Updated
 
-**Date:** 10/29/2025 4:29 PM
-**Status:** Phases 1-3 Complete [100%], Phase 4 Pending [0%], Phase 5 Pending [0%]
-**Work Session Duration:** ~4.5 hours
-**Completed:** Phase 3 action hierarchy implementation complete, all documentation updated
+**Date:** 10/29/2025 7:01 PM
+**Status:** Phases 1-3 Complete [100%], Phase 3.5 Bug Fix [100%], Phase 4 Pending [0%], Phase 5 Pending [0%]
+**Work Session Duration:** ~4.75 hours
+**Completed:** Phase 3 action hierarchy implementation, Phase 3.5 double fizzle bug fix, all documentation updated
 **Next Action:** Begin Phase 4 Performance Optimization
 
 ---
@@ -397,6 +432,7 @@ The Sphere 0.51a combat system implementation is 80% complete with all core mech
 - [x] Independent timer systems (Phase 1)
 - [x] Complete spellcasting integration (Phase 2)
 - [x] Combat action cancellation hierarchy (Phase 3)
+- [x] Double fizzle bug fix (Phase 3.5)
 - [x] All configuration toggles operational
 - [x] Build verification (all 7 projects compile)
 - [x] Comprehensive documentation
