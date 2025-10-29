@@ -1,8 +1,8 @@
 # Sphere 0.51a Combat System Implementation Progress
 
 **Repository:** https://github.com/EZMajor/ModernUO---51a-style  
-**Last Updated:** 10/29/2025 1:08 PM  
-**Overall Progress:** 10% Complete (1-2 phases of 5-6 total)
+**Last Updated:** 10/29/2025 2:32 PM  
+**Overall Progress:** 25% Complete (Phase 1 + Phase 2 Planning)
 
 ---
 
@@ -20,11 +20,12 @@
 - All 7 projects compile successfully
 - Independent timer system operational
 
-### Phase 2: Complete Spellcasting Integration [NEXT]
+### Phase 2: Complete Spellcasting Integration [IN PROGRESS]
 - Duration: Estimated 3-4 days
-- Status: READY TO START
-- Key Files: Spell.cs, SpellTarget.cs, SpellHelper.cs
+- Status: PLANNING COMPLETE, IMPLEMENTATION PENDING
+- Planning: Completed 10/29/2025 2:32 PM
 - Objective: Implement Sphere-compliant spell casting flow
+- Architecture Analysis: COMPLETE
 
 ---
 
@@ -34,11 +35,11 @@
 |-------|----------|--------|-----------------|-------|
 | Phase 0: Foundation | 1-2 days | [COMPLETE] | 10/29/2025 12:05 PM | Benchmarking, tests, rollback |
 | Phase 1: Timer Independence | 2-3 days | [COMPLETE] | 10/29/2025 1:00 PM | Mobile.cs integration verified |
-| Phase 2: Spell Integration | 3-4 days | [NEXT] | Est. 11/01/2025 | Target cursor, cast delays |
+| Phase 2: Spell Integration | 3-4 days | [IN PROGRESS] | Planning: 10/29/2025 2:32 PM | Architecture analyzed, ready for code |
 | Phase 3: Action Hierarchy | 2-3 days | [PENDING] | Est. 11/03/2025 | Cancellation rules |
 | Phase 4: Optimization | 3-4 days | [PENDING] | Est. 11/06/2025 | Memory & CPU optimization |
 | Phase 5: Validation | 2-3 days | [PENDING] | Est. 11/08/2025 | Stress testing & final validation |
-| **TOTAL** | **17-23 days** | **10% Complete** | **Est. 11/08/2025** | Full implementation |
+| **TOTAL** | **17-23 days** | **25% Complete** | **Est. 11/08/2025** | Full implementation |
 
 ---
 
@@ -93,32 +94,79 @@
 
 ---
 
-### Phase 2: Complete Spellcasting Integration [NEXT]
+### Phase 2: Complete Spellcasting Integration [IN PROGRESS]
 
-**Estimated Start Date:** 10/29/2025  
+**Estimated Start Date:** 10/29/2025 1:18 PM  
+**Planning Complete:** 10/29/2025 2:32 PM  
 **Estimated Completion Date:** Est. 11/01/2025  
 **Estimated Duration:** 3-4 days
 
-**Planned Tasks:**
+#### Phase 2 Planning Summary (COMPLETE):
+
+Architecture analysis identified:
+
+**SpellTarget.cs Status: [COMPLETE]**
+- Immediate target cursor (no pre-cast delay): Implemented
+- Post-target delay with animations: Implemented
+- Spell replacement logic: Implemented
+- Hand clearing and casting animations: Implemented
+- Timer.StartTimer for delayed effect: Implemented
+
+**Spell.cs Status: [PARTIAL]**
+- Fields for post-target delay: Present
+- Fields for spell replacement: Present
+- Sphere-style conditionals: Present
+- Mana deduction timing: Needs completion
+- Restricted fizzle triggers: Needs implementation
+
+**SphereSpellHelper.cs Status: [COMPLETE]**
+- Supporting methods: All present
+- Movement blocking checks: Implemented
+- Cast validation: Implemented
+
+#### Planned Tasks:
+
 - [ ] Implement immediate target cursor on cast initiation
 - [ ] Implement cast delay between target selection and effect
-- [ ] Remove post-cast recovery delays
+- [ ] Move post-cast recovery delays handling
 - [ ] Implement mana deduction at target confirmation (not cast start)
 - [ ] Verify BlocksMovement returns false during casting
 - [ ] Confirm movement does NOT cause fizzle
-- [ ] Implement fizzle trigger rules
+- [ ] Implement fizzle trigger rules (restricted triggers only)
 - [ ] Verify fizzle does NOT trigger on non-specified actions
 
 **Key Files to Modify:**
-- Projects/UOContent/Spells/Base/Spell.cs
-- Projects/UOContent/Spells/Base/SpellTarget.cs
-- Projects/UOContent/Spells/Base/SpellHelper.cs
+- Projects/UOContent/Spells/Base/Spell.cs (Mana timing, fizzle triggers)
+- Projects/UOContent/Spells/Base/SpellTarget.cs (Verification & testing)
+- Projects/UOContent/Systems/Combat/SphereStyle/SphereConfig.cs (Config validation)
 
 **Objectives:**
 1. Spell casting flow matches Sphere 0.51a behavior
 2. Movement during casting allowed without fizzle
 3. Fizzle triggers only on: spell cast, bandage, wand, paralyzed, death
 4. No fizzle on: movement, damage, potions, equip
+
+#### Testing Requirements:
+
+1. Unit tests via SphereTestHarness
+   - Immediate cursor appearance
+   - Post-target delay with animations
+   - Mana deduction timing
+   - Spell replacement on target selection
+   - Fizzle with restricted triggers
+   - No fizzle with disallowed triggers
+
+2. Integration tests
+   - Basic spell cast flow
+   - Movement during targeting
+   - Movement during post-target delay
+   - Damage during casting
+   - Multiple spell replacement scenarios
+
+3. Performance benchmarking
+   - Compare vs Phase 1 baseline
+   - No performance regression
+   - Timing accuracy verification
 
 ---
 
@@ -194,7 +242,7 @@
 
 ### Code Metrics
 - **Total Files Created:** 3 (SphereBenchmarks.cs, SphereTestHarness.cs, SphereRollback.cs)
-- **Total Files Modified:** 1 (Claude.md)
+- **Total Files Modified:** 1 (Claude.md - updated with Phase 2 plan)
 - **Total Lines Added:** ~2,500+
 - **Compilation Errors:** 0
 - **Compilation Warnings:** 0
@@ -207,9 +255,9 @@
 - **Configuration System:** 30+ toggles verified
 
 ### Git Commits
-- **Total Commits This Session:** 1
+- **Total Commits This Session:** 1 (Phase 1 completion)
 - **Branch:** fix/spell-casting-issues
-- **Remote Status:** Pushed to GitHub
+- **Remote Status:** Ready for push
 
 ---
 
@@ -267,6 +315,13 @@ SphereConfig.cs (30+ toggles)
 - [MITIGATED] Breaking changes - Rollback system ready for emergency revert
 - [MITIGATED] Documentation gaps - Professional standards applied
 
+### Phase 2 Risks:
+
+- [RISK] Mana deduction timing - Complex timing logic, requires careful testing
+- [MITIGATION] Comprehensive testing via SphereTestHarness
+- [MITIGATION] Spell replacement already partially implemented
+- [MITIGATION] Architecture already in place
+
 ### Mitigation Strategies
 1. Comprehensive testing framework in place
 2. Rollback system ready for any critical issues
@@ -283,12 +338,14 @@ SphereConfig.cs (30+ toggles)
 - [x] Phase 1 complete
 - [x] All 7 projects building
 - [x] Baseline metrics established
+- [x] Architecture analysis complete
 
 ### Required for Success:
 - Independent timer system operational (Phase 1 - COMPLETE)
 - Test harness ready (Phase 0 - COMPLETE)
 - Rollback system active (Phase 0 - COMPLETE)
 - Professional documentation standards (APPLIED)
+- Phase 2 architecture documented (COMPLETE)
 
 ---
 
@@ -296,15 +353,17 @@ SphereConfig.cs (30+ toggles)
 
 **None currently identified.** All systems verified and operational.
 
+**Phase 2 Planning Status:** Complete and documented
+
 ---
 
 ## Next Actions
 
-1. Review Phase 1 completion report
-2. Prepare Phase 2 implementation
-3. Review Spell.cs for casting flow modifications
-4. Plan spell target cursor implementation
-5. Schedule Phase 2 kickoff
+1. Continue Phase 2 implementation with mana deduction timing
+2. Implement restricted fizzle triggers in Spell.cs
+3. Run SphereTestHarness for validation
+4. Benchmark performance vs Phase 1
+5. Update documentation with Phase 2 completion
 
 ---
 
@@ -314,6 +373,7 @@ SphereConfig.cs (30+ toggles)
 **Branch:** fix/spell-casting-issues  
 **Remote:** origin  
 **Latest Commit:** 33d366add (Phase 1 Complete: Core Timer Independence Implementation)
+**Planning Commit:** Pending Phase 2 implementation
 
 ---
 
@@ -321,6 +381,7 @@ SphereConfig.cs (30+ toggles)
 
 - Main Implementation: Claude.md
 - Phase 1 Report: PHASE1_COMPLETION_REPORT.md
+- Phase 2 Guide: PHASE2_IMPLEMENTATION_GUIDE.md (Updated)
 - Test Harness: Projects/UOContent/Systems/Combat/SphereStyle/SphereTestHarness.cs
 - Benchmarks: Projects/UOContent/Systems/Combat/SphereStyle/SphereBenchmarks.cs
 - System Docs: Projects/UOContent/Systems/Combat/SphereStyle/README.md

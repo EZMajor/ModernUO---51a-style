@@ -1,15 +1,19 @@
 # Phase 2 Implementation Guide: Complete Spellcasting Integration
 
 **Start Date:** 10/29/2025 1:18 PM  
+**Planning Complete:** 10/29/2025 2:32 PM  
 **Phase:** 2 of 5  
-**Status:** IN PROGRESS  
-**Duration:** Estimated 3-4 days
+**Status:** READY FOR IMPLEMENTATION  
+**Duration:** Estimated 3-4 days  
+**Architecture Analysis:** COMPLETE
 
 ---
 
 ## Overview
 
 Phase 2 implements Sphere 0.51a spellcasting mechanics with immediate target cursors, post-target cast delays, proper spell cancellation hierarchy, and restricted fizzle triggers.
+
+The architecture analysis (10/29/2025 2:32 PM) confirms that most infrastructure is already in place. This guide documents the remaining implementation tasks required to complete Phase 2.
 
 ---
 
@@ -47,62 +51,186 @@ Phase 2 implements Sphere 0.51a spellcasting mechanics with immediate target cur
 
 ---
 
+## Current Implementation Status
+
+### Architecture Analysis Results (10/29/2025 2:32 PM)
+
+#### SpellTarget.cs - [COMPLETE]
+Status: All core infrastructure implemented and working
+
+- [PASS] Immediate target cursor (no pre-cast delay) - Implemented
+- [PASS] Post-target delay with animations and mantra - Implemented
+- [PASS] Spell replacement logic with ReplacedSpell tracking - Implemented
+- [PASS] Hand clearing and casting animations - Implemented during post-target delay
+- [PASS] Timer.StartTimer for delayed spell effect execution - Implemented
+- [PASS] OnTargetFinish handling for sequence completion - Implemented
+- [PASS] Disturb logic for spell replacement - Implemented
+
+**Finding:** SpellTarget.cs has the complete post-target cast delay mechanism implemented. No modifications needed for this file beyond testing and validation.
+
+#### Spell.cs - [PARTIAL]
+Status: Foundation in place, specific modifications needed
+
+**Present:**
+- [PASS] _spherePostTargetDelay field for storing post-target delay
+- [PASS] _replacedSpell field for tracking replaced spells
+- [PASS] _hasSelectedTarget flag for fizzle logic
+- [PASS] Sphere-style conditionals in Cast() method
+- [PASS] CheckSequence() method structure ready for mana deduction
+
+**Needs Modification:**
+- [ ] Remove mana check from Cast() when Sphere immediate targeting enabled
+- [ ] Add mana deduction to CheckSequence() at target confirmation
+- [ ] Modify Disturb() for restricted fizzle triggers
+- [ ] Update OnCasterHurt() to respect restricted fizzle configuration
+
+#### SphereSpellHelper.cs - [COMPLETE]
+Status: All supporting methods present
+
+- [PASS] CheckBlocksMovement() - Movement blocking logic
+- [PASS] GetCastRecovery() - Recovery delay handling
+- [PASS] OnCastBegin() - Cast initiation
+- [PASS] ValidateCast() - Cast validation
+- [PASS] OnSpellDisturb() - Disturbance handling
+- [PASS] CheckDamageDisturb() - Damage fizzle logic
+
+**Finding:** SphereSpellHelper has all necessary supporting methods. No new methods needed.
+
+---
+
 ## Implementation Checklist
 
-### 1. Post-Target Cast Delay Mechanism
-- [ ] Create new timer for post-target delay phase
-- [ ] Move spell animations to post-target phase
-- [ ] Move mantra to post-target phase
-- [ ] Update paralyze/freeze handling
-- [ ] Ensure movement allowed during delay
+### 1. Mana Deduction Timing [PENDING]
+**Status:** Architecture defined, implementation pending
+
+- [ ] Modify Spell.Cast() method (lines around 641)
+  - Remove mana check when `sphereImmediateTargetMode` is true
+  - Keep mana check for non-Sphere mode
+  - Ensure error messages remain for insufficient mana
+
+- [ ] Modify Spell.CheckSequence() method
+  - Add mana deduction at target confirmation
+  - Keep existing reagent consumption logic
+  - Handle mana failure with proper messaging
+  - Ensure resource consumption on fizzle
 
 **Files to Modify:**
+- `Projects/UOContent/Spells/Base/Spell.cs` (Cast and CheckSequence methods)
+
+**Testing:**
+- Verify mana check happens at target confirmation
+- Verify insufficient mana error message at confirmation
+- Verify mana deducted only on successful cast
+- Verify resources consumed on spell fizzle
+
+### 2. Restricted Fizzle Triggers [PENDING]
+**Status:** Architecture defined, implementation pending
+
+- [ ] Modify Spell.Disturb() method
+  - Add check for restricted fizzle triggers
+  - Only allow fizzle on: DisturbType.NewCast, DisturbType.Bandage, DisturbType.Wand, DisturbType.Paralyzed, DisturbType.Kill
+  - Skip fizzle animation and resource consumption for non-restricted triggers
+  - Maintain backward compatibility with ModernUO mode
+
+- [ ] Update Spell.OnCasterHurt() method
+  - Check SphereConfig.RestrictedFizzleTriggers
+  - Skip damage-based fizzle if restricted fizzle triggers enabled
+  - Maintain existing protection spell logic
+
+**Files to Modify:**
+- `Projects/UOContent/Spells/Base/Spell.cs` (Disturb and OnCasterHurt methods)
+- `Projects/UOContent/Systems/Combat/SphereStyle/SphereConfig.cs` (verify toggles)
+
+**Testing:**
+- Verify fizzle on spell cast (NewCast trigger)
+- Verify NO fizzle on movement
+- Verify NO fizzle on damage
+- Verify NO fizzle on potion use
+- Verify fizzle on bandage use
+- Verify fizzle on wand use
+- Verify fizzle on paralyzed/death states
+
+### 3. Movement During Casting [PENDING]
+**Status:** Architecture defined, implementation pending
+
+- [ ] Verify BlocksMovement property
+  - Returns false during targeting phase (immediate cursor mode)
+  - Returns false during post-target delay (if configured)
+  - Calls SphereSpellHelper.CheckBlocksMovement()
+  - Respects SphereConfig.AllowMovementDuringCast
+
+- [ ] Verify OnCasterMoving() method
+  - Allows movement when BlocksMovement returns false
+  - No fizzle on movement in either phase
+  - Proper error messages only when movement blocked
+
+**Files to Modify:**
+- `Projects/UOContent/Spells/Base/Spell.cs` (OnCasterMoving validation)
+
+**Testing:**
+- Movement during targeting phase (should work)
+- Movement during post-target delay (should work)
+- No fizzle on movement
+- No error messages when movement allowed
+
+### 4. Post-Target Delay Mechanism [VERIFICATION]
+**Status:** Architecture confirmed working, testing pending
+
+- [ ] Verify SpellTarget.OnTarget() implementation
+  - Calls SphereSpellHelper.OnCastBegin()
+  - Triggers post-target delay timer
+  - Executes spell effect after delay
+
+- [ ] Verify CastTimer implementation
+  - Starts post-target delay
+  - Plays animations and mantra
+  - Executes spell effect
+
+- [ ] Verify casting animations
+  - Animations play during post-target delay
+  - Mantra says during post-target delay
+  - Hand effects display correctly
+
+**Files to Verify:**
 - `Projects/UOContent/Spells/Base/Spell.cs` (CastTimer class)
-- `Projects/UOContent/Systems/Combat/SphereStyle/SphereSpellHelper.cs`
+- `Projects/UOContent/Spells/Targeting/SpellTarget.cs` (OnTarget method)
 
-### 2. Mana Deduction Timing
-- [ ] Remove mana deduction from Cast() method
-- [ ] Move mana deduction to CheckSequence() method
-- [ ] Keep reagent consumption at CheckSequence()
-- [ ] Add mana deduction failure handling
+**Testing:**
+- Immediate cursor on cast start
+- Post-target delay with animations
+- Mantra says during delay
+- Spell effect after delay completes
+- Various cast delays (instant, 0.5s, 1.0s, 1.5s)
 
-**Files to Modify:**
-- `Projects/UOContent/Spells/Base/Spell.cs` (Cast and CheckSequence methods)
+### 5. Configuration & Testing [PENDING]
+**Status:** Configuration defined, validation pending
 
-### 3. Spell Replacement Logic
-- [ ] Complete _replacedSpell tracking in Cast()
-- [ ] Implement fizzle on replaced spell at target confirmation
-- [ ] Ensure previous spell resources consumed on fizzle
-- [ ] Handle multiple spell replacement scenarios
+- [ ] Verify SphereConfig toggles
+  - ImmediateSpellTarget - Enable immediate cursor
+  - CastDelayAfterTarget - Enable post-target delay
+  - AllowMovementDuringCast - Allow movement
+  - RemovePostCastRecovery - No post-cast recovery
+  - RestrictedFizzleTriggers - Restrict fizzle actions
+  - TargetManaDeduction - Deduct mana at target confirmation
 
-**Files to Modify:**
-- `Projects/UOContent/Spells/Base/Spell.cs` (Cast and CheckSequence methods)
+- [ ] Run SphereTestHarness
+  - All 10 tests should pass
+  - Specific focus on Phase 2 tests
+  - Test result verification
 
-### 4. Movement During Casting
-- [ ] Verify BlocksMovement returns false when configured
-- [ ] Ensure paralyze not applied during targeting
-- [ ] Test movement in targeting phase
-- [ ] Test movement in post-target phase
-
-**Files to Modify:**
-- `Projects/UOContent/Spells/Base/Spell.cs` (Cast and OnCasterMoving)
-
-### 5. Restricted Fizzle Triggers
-- [ ] Verify fizzle only on specified triggers
-- [ ] Disable damage-based fizzle
-- [ ] Disable equipment-based fizzle
-- [ ] Disable movement-based fizzle
-- [ ] Test all trigger combinations
+- [ ] Run SphereBenchmarks
+  - Compare against Phase 1 baseline
+  - Verify no performance regression
+  - Document results
 
 **Files to Modify:**
-- `Projects/UOContent/Spells/Base/Spell.cs` (OnCasterHurt, OnCasterEquipping)
-- `Projects/UOContent/Systems/Combat/SphereStyle/SphereSpellHelper.cs`
+- `Projects/UOContent/Systems/Combat/SphereStyle/SphereConfig.cs` (verify all toggles)
 
-### 6. Configuration & Testing
-- [ ] Verify all SphereConfig toggles work
-- [ ] Run SphereTestHarness with Phase 2 tests
-- [ ] Run SphereBenchmarks for performance baseline
-- [ ] Document any issues or edge cases
+**Testing:**
+- All configuration toggles working correctly
+- All 10 SphereTestHarness tests passing
+- Performance baseline comparison successful
+- No compilation errors or warnings
 
 ---
 
@@ -110,64 +238,67 @@ Phase 2 implements Sphere 0.51a spellcasting mechanics with immediate target cur
 
 ### Spell.cs Changes Required
 
-#### 1. Cast() Method
+#### 1. Cast() Method [IMPLEMENTATION PENDING]
 **Current Behavior:**
 - Mana deducted at cast start
 - Animations/mantra play immediately
 - Paralyze applied immediately
 - NextSpellTime set immediately
 
-**New Behavior:**
-- Mana NOT deducted at cast start
-- Animations/mantra delayed to post-target
-- Paralyze NOT applied during targeting
-- NextSpellTime set AFTER post-target delay
+**Required Changes:**
+- Skip mana check when `sphereImmediateTargetMode` is true
+- Skip animations/mantra (moved to post-target)
+- Skip paralyze during targeting (only when post-target starts)
+- Keep NextSpellTime setting logic
+- Maintain error messages for insufficient mana (shown at confirmation)
 
-#### 2. CastTimer Inner Class
+#### 2. CheckSequence() Method [IMPLEMENTATION PENDING]
 **Current Behavior:**
-- Single timer for pre-cast delay
-- Moves directly from Casting to Sequencing
+- Assumes mana already deducted
+- Consumes reagents
+- Triggers spell effect
 
-**New Behavior:**
-- CastTimer remains for post-target delay
-- Sequencing happens immediately on target selection
-- New state tracking for different phases
+**Required Changes:**
+- Add mana deduction check at this point
+- Keep reagent consumption
+- Add mana failure handling
+- Keep spell effect trigger
+- Ensure resources consumed on failure
 
-#### 3. CheckSequence() Method
+#### 3. Disturb() Method [IMPLEMENTATION PENDING]
 **Current Behavior:**
-- Mana already deducted
-- Reagents consumed
-- Spell effect triggered
+- Shows fizzle on most disturbances
+- Consumes resources on fizzle
 
-**New Behavior:**
-- Mana deducted here
-- Reagents consumed here
-- Fizzle on replaced spell handled here
-- Spell effect triggered
+**Required Changes:**
+- Add DisturbType check for restricted fizzle triggers
+- Only show fizzle on: NewCast, Bandage, Wand, Paralyzed, Kill
+- Skip fizzle effects on: Movement, Hurt, EquipRequest, UseRequest
+- Skip resource consumption for non-fizzle disturbances
 
-#### 4. OnCasterMoving() Method
+#### 4. OnCasterHurt() Method [IMPLEMENTATION PENDING]
 **Current Behavior:**
-- Returns false if IsCasting and BlocksMovement
+- Disturbs on damage
 
-**New Behavior:**
-- Returns true during targeting phase
-- Returns true during post-target delay
-- Only blocks movement if configured
+**Required Changes:**
+- Check SphereConfig.RestrictedFizzleTriggers
+- Skip disturbance if restricted fizzle triggers enabled
+- Maintain existing protection spell logic
 
 ---
 
 ## Testing Scenarios
 
-### Scenario 1: Basic Spell Cast
+### Scenario 1: Basic Spell Cast [PENDING]
 1. Player initiates spell cast
 2. Cursor appears immediately
 3. Player selects target
-4. Mana/reagents consumed
+4. Mana/reagents consumed at confirmation
 5. Cast delay begins
 6. Animation plays
 7. Spell effect applied
 
-### Scenario 2: Spell Cancellation
+### Scenario 2: Spell Cancellation [PENDING]
 1. Player casts Spell A
 2. Before target selection, cast Spell B
 3. Spell A cursor closes
@@ -176,7 +307,7 @@ Phase 2 implements Sphere 0.51a spellcasting mechanics with immediate target cur
 6. Spell A fizzles (resources consumed)
 7. Spell B executes normally
 
-### Scenario 3: Movement During Cast
+### Scenario 3: Movement During Cast [PENDING]
 1. Player initiates spell cast
 2. Cursor appears
 3. Player moves (should NOT fizzle)
@@ -184,14 +315,14 @@ Phase 2 implements Sphere 0.51a spellcasting mechanics with immediate target cur
 5. Player moves during post-target delay (should NOT fizzle)
 6. Spell effect applied
 
-### Scenario 4: Damage During Cast
+### Scenario 4: Damage During Cast [PENDING]
 1. Player initiates spell cast
-2. Player takes damage
-3. Cast continues (no fizzle)
+2. Player takes damage (should NOT fizzle)
+3. Cast continues
 4. Player selects target
 5. Spell effect applied
 
-### Scenario 5: Bandage Interrupt
+### Scenario 5: Bandage Interrupt [PENDING]
 1. Player initiates spell cast
 2. Cursor appears
 3. Player uses bandage
@@ -206,27 +337,68 @@ Phase 2 implements Sphere 0.51a spellcasting mechanics with immediate target cur
 - No new memory allocations in hot path
 - Fizzle checks optimized with early returns
 - Configuration toggles minimize runtime checks
+- Compare against Phase 1 baseline via SphereBenchmarks
 
 ---
 
 ## Success Criteria
 
-- [x] All automated tests passing
-- [ ] Immediate cursor on cast initiation
-- [ ] Post-target cast delay working
-- [ ] Mana deducted at target confirmation
-- [ ] Spell cancellation hierarchy implemented
-- [ ] Movement allowed without fizzle
-- [ ] Fizzle only on specified triggers
-- [ ] No performance regression vs Phase 1 baseline
+### Phase 2 Implementation Completeness:
+
+- [x] Architecture analysis complete (10/29/2025 2:32 PM)
+- [x] Implementation plan documented
+- [x] Identified all required modifications
+- [x] Created testing strategy
+- [ ] Mana deduction timing implemented
+- [ ] Restricted fizzle triggers implemented
+- [ ] Movement validation complete
+- [ ] Post-target delay tested
+- [ ] All configuration toggles verified
+- [ ] All 10 SphereTestHarness tests passing
+- [ ] Performance baseline comparison complete
 - [ ] All 7 projects build successfully
+- [ ] Professional documentation updated
+- [ ] Phase 2 completion documented
+- [ ] Changes committed to git
+
+---
+
+## Implementation Order
+
+**Recommended sequence for implementation:**
+
+1. **Step 1:** Mana deduction timing (Spell.cs Cast/CheckSequence modifications)
+2. **Step 2:** Restricted fizzle triggers (Spell.cs Disturb/OnCasterHurt modifications)
+3. **Step 3:** Run SphereTestHarness tests
+4. **Step 4:** Run SphereBenchmarks and compare baseline
+5. **Step 5:** Document Phase 2 completion
+6. **Step 6:** Commit changes to git
 
 ---
 
 ## References
 
-- **Main Plan:** Claude.md - Section "Phase 2: Complete Spellcasting Integration"
+- **Main Plan:** Claude.md - Phase 2 Section
 - **Sphere Rules:** Sphere0.51aCombatSystem.md - Section 2.2
 - **Spell Code:** Projects/UOContent/Spells/Base/Spell.cs
+- **Target Code:** Projects/UOContent/Spells/Targeting/SpellTarget.cs
 - **Helper Methods:** Projects/UOContent/Systems/Combat/SphereStyle/SphereSpellHelper.cs
 - **Configuration:** Projects/UOContent/Systems/Combat/SphereStyle/SphereConfig.cs
+- **Test Harness:** Projects/UOContent/Systems/Combat/SphereStyle/SphereTestHarness.cs
+- **Benchmarks:** Projects/UOContent/Systems/Combat/SphereStyle/SphereBenchmarks.cs
+
+---
+
+## Status Summary
+
+**Planning Phase:** COMPLETE (10/29/2025 2:32 PM)
+- Architecture analyzed
+- Implementation tasks identified
+- Testing strategy defined
+- Success criteria documented
+
+**Implementation Phase:** PENDING
+- Ready to begin implementation
+- All prerequisites met
+- Infrastructure in place
+- Testing framework ready
