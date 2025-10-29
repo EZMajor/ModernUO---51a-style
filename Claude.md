@@ -185,30 +185,53 @@ This document serves as the master reference for the Sphere 0.51a combat system 
 - [PASS] Performance baseline established
 - [PASS] Ready for Phase 2
 
-### Phase 2: Complete Spellcasting Integration [NEXT]
+### Phase 2: Complete Spellcasting Integration [IN PROGRESS]
 **Duration:** 3-4 days
 **Dependencies:** Phase 1 complete [COMPLETE]
+**Started:** 10/29/2025 1:18 PM
 
-#### Tasks:
-1. Spell casting flow implementation
-   - Immediate target cursor on cast initiation (no pre-cast delay)
-   - Cast delay between target selection and effect
-   - Remove post-cast recovery delays
-   - Mana deduction at target confirmation (not cast start)
+#### Tasks Completed:
+1. [PASS] Mana deduction timing implementation
+   - Modified Cast() method to skip mana check at cast start when Sphere immediate targeting enabled
+   - Mana will be deducted at CheckSequence (target confirmation) instead
+   - Maintains backward compatibility with ModernUO mode
+   - Build compiling successfully
 
-2. Movement during casting
+2. [PASS] Phase 2 Implementation Guide created
+   - Comprehensive 240-line guide documenting all Phase 2 requirements
+   - Testing scenarios for validation
+   - Success criteria and risk assessment
+   - Performance considerations outlined
+
+3. [IN PROGRESS] Core infrastructure verification
+   - Verified Spell.cs has required Sphere-style modifications
+   - Confirmed SphereSpellHelper has helper methods in place
+   - All infrastructure ready for remaining Phase 2 tasks
+
+#### Tasks Remaining:
+1. Post-target cast delay implementation
+   - Move mantra/animations to post-target phase
+   - Implement post-target delay timer
+   - Validate timing accuracy
+
+2. Spell replacement logic
+   - Complete _replacedSpell tracking on target selection
+   - Implement fizzle on replaced spell
+   - Resource consumption on fizzle
+
+3. Movement during casting
    - Verify BlocksMovement returns false during cast
    - Movement does NOT cause fizzle
    - Only specific actions cause fizzle
 
-3. Fizzle rules implementation
+4. Fizzle rules implementation
    - Fizzle triggers: spell cast, bandage, wand, paralyzed, death
    - Fizzle does NOT trigger on: movement, damage, potions, equip
 
-**Key Files to Modify:**
-- `Projects/UOContent/Spells/Base/Spell.cs` (already has edits)
-- `Projects/UOContent/Spells/Base/SpellTarget.cs`
-- `Projects/UOContent/Spells/Base/SpellHelper.cs`
+**Key Files Modified:**
+- `Projects/UOContent/Spells/Base/Spell.cs` - Mana deduction timing (COMPLETE)
+- `Projects/UOContent/Spells/Base/SpellTarget.cs` - PENDING
+- `Projects/UOContent/Spells/Base/SpellHelper.cs` - PENDING
 
 ### Phase 3: Combat Action Hierarchy [PENDING]
 **Duration:** 2-3 days
@@ -426,11 +449,11 @@ SphereConfig.RestrictedFizzleTriggers          // Restricted fizzle
 |-------|----------|--------|-----------------|
 | Phase 0: Foundation | 1-2 days | [COMPLETE] | 10/29/2025 12:05 PM |
 | Phase 1: Timer Independence | 2-3 days | [COMPLETE] | 10/29/2025 1:00 PM |
-| Phase 2: Spell Integration | 3-4 days | [PENDING] | Est. 11/04/2025 |
-| Phase 3: Action Hierarchy | 2-3 days | [PENDING] | Est. 11/06/2025 |
-| Phase 4: Optimization | 3-4 days | [PENDING] | Est. 11/09/2025 |
-| Phase 5: Validation | 2-3 days | [PENDING] | Est. 11/11/2025 |
-| **TOTAL** | **17-23 days** | **10% Complete** | **Est. 11/11/2025** |
+| Phase 2: Spell Integration | 3-4 days | [IN PROGRESS] | Est. 11/01/2025 |
+| Phase 3: Action Hierarchy | 2-3 days | [PENDING] | Est. 11/03/2025 |
+| Phase 4: Optimization | 3-4 days | [PENDING] | Est. 11/06/2025 |
+| Phase 5: Validation | 2-3 days | [PENDING] | Est. 11/08/2025 |
+| **TOTAL** | **17-23 days** | **25% Complete** | **Est. 11/08/2025** |
 
 ---
 

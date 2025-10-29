@@ -583,12 +583,30 @@ namespace Server.Spells
             {
                 var requiredMana = ScaleMana(GetMana());
 
-                if (Caster.Mana >= requiredMana)
+                //Sphere-style edit: In immediate target mode, allow multiple spells in Casting state
+                // The active spell will be canceled when target is selected for the new one
+                var sphereImmediateTargetMode = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                                               Systems.Combat.SphereStyle.SphereConfig.ImmediateSpellTarget;
+
+                //Sphere-style edit: In Sphere mode with immediate targeting, skip mana check at cast start
+                // Mana will be checked and consumed at CheckSequence (target confirmation)
+                if (!sphereImmediateTargetMode && Caster.Mana < requiredMana)
                 {
-                    //Sphere-style edit: In immediate target mode, allow multiple spells in Casting state
-                    // The active spell will be canceled when target is selected for the new one
-                    var sphereImmediateTargetMode = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
-                                                   Systems.Combat.SphereStyle.SphereConfig.ImmediateSpellTarget;
+                    if (Caster.NetState?.IsKRClient != true && Caster.NetState?.Version >= ClientVersion.Version70654)
+                    {
+                        // Insufficient mana. You must have at least ~1_MANA_REQUIREMENT~ Mana to use this spell.
+                        Caster.LocalOverheadMessage(MessageType.Regular, 0x22, 502625, requiredMana.ToString());
+                    }
+                    else
+                    {
+                        Caster.LocalOverheadMessage(MessageType.Regular, 0x22, 502625); // Insufficient mana
+                    }
+
+                    return false;
+                }
+
+                if (Caster.Mana >= requiredMana || sphereImmediateTargetMode)
+                {
 
                     // In immediate target mode, we don't cancel here - we just update Caster.Spell
                     // The old spell's targeting cursor stays active until new spell target is selected
