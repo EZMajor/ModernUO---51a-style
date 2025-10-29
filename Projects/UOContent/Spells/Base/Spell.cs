@@ -38,6 +38,9 @@ namespace Server.Spells
         // This is used to determine if fizzle should occur when replaced by another spell
         private bool _hasSelectedTarget;
 
+        //Phase 2: Track remaining mana to deduct on successful spell completion for dual mana deduction
+        private int _pendingManaDeduction;
+
         public Spell(Mobile caster, Item scroll, SpellInfo info)
         {
             Caster = caster;
@@ -118,6 +121,22 @@ namespace Server.Spells
             // Confirm: Monsters and pets cannot be disturbed.
             if (Caster.Player && IsCasting)
             {
+                //Sphere-style edit: Respect damage-based fizzle configuration
+                // If RestrictedFizzleTriggers is enabled, only allow fizzle from specific actions
+                // Damage (DisturbType.Hurt) should not cause fizzle in restricted mode
+                if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                    Systems.Combat.SphereStyle.SphereConfig.RestrictedFizzleTriggers)
+                {
+                    return; // Don't fizzle on damage when restricted fizzle is enabled
+                }
+
+                //Sphere-style edit: Also check DamageBasedFizzle configuration
+                if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                    !Systems.Combat.SphereStyle.SphereConfig.DamageBasedFizzle)
+                {
+                    return; // Don't fizzle on damage if damage-based fizzle is disabled
+                }
+
                 var hasProtection = ProtectionSpell.Registry.TryGetValue(Caster, out var d);
                 if (!hasProtection || d < 1000 && d < Utility.Random(1000))
                 {
@@ -450,9 +469,22 @@ namespace Server.Spells
             State = SpellState.None;
             Caster.Spell = null;
 
+            //Sphere-style edit: Check if fizzle should occur based on restricted fizzle triggers
+            var shouldFizzle = (wasCasting || wasSequencing || wasInCastDelay);
+            
+            if (shouldFizzle && Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                Systems.Combat.SphereStyle.SphereConfig.RestrictedFizzleTriggers)
+            {
+                // Sphere 0.51a restricted fizzle triggers:
+                // ALLOWED: NewCast (interrupted by another spell), Kill (caster dies)
+                // DISALLOWED: Hurt (damage), EquipRequest (equipment change), UseRequest (bandage/wand/potion use)
+                shouldFizzle = type == DisturbType.NewCast ||
+                              type == DisturbType.Kill;
+            }
+
             //Sphere-style edit: Show fizzle effects and consume resources when interrupted
             // This handles Casting (targeting), Sequencing (countdown), and CastDelay (post-target anim) states
-            if ((wasCasting || wasSequencing || wasInCastDelay) && type == DisturbType.NewCast)
+            if (shouldFizzle)
             {
                 DoFizzle();
 
@@ -900,7 +932,36 @@ namespace Server.Spells
             }
             else if (CheckFizzle())
             {
-                Caster.Mana -= mana;
+                // Phase 2: Dual mana deduction system
+                // If TargetManaDeduction is enabled, split mana into partial + remaining
+                var sphereTargetMana = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                                      Systems.Combat.SphereStyle.SphereConfig.TargetManaDeduction;
+
+                if (sphereTargetMana && _pendingManaDeduction == 0)
+                {
+                    // First time spell is being cast - deduct partial mana now
+                    var partialPercent = Systems.Combat.SphereStyle.SphereConfig.PartialManaPercent;
+                    var partialMana = (mana * partialPercent) / 100;
+                    var remainingMana = mana - partialMana;
+
+                    Caster.Mana -= partialMana;
+                    _pendingManaDeduction = remainingMana;
+                }
+                else if (sphereTargetMana && _pendingManaDeduction > 0)
+                {
+                    // Spell is succeeding - deduct remaining mana now
+                    var remainingMana = _pendingManaDeduction;
+                    Caster.Mana -= remainingMana;
+                    _pendingManaDeduction = 0;
+                }
+                else
+                {
+                    // Standard behavior - deduct full mana
+                    Caster.Mana -= mana;
+                }
+
+                //Phase 2: Clear pending mana on successful cast (fizzle won't be called after this)
+                _pendingManaDeduction = 0;
 
                 if (Scroll is SpellScroll)
                 {
@@ -962,6 +1023,8 @@ namespace Server.Spells
             else
             {
                 DoFizzle();
+                //Phase 2: Clear pending mana deduction on fizzle
+                _pendingManaDeduction = 0;
             }
 
             return false;

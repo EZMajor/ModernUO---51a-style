@@ -894,6 +894,14 @@ public abstract partial class BaseWeapon
         {
             attacker.DisruptiveAction();
 
+            //Sphere-style edit: Cancel active spell if swing cancels spell
+            if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                Systems.Combat.SphereStyle.SphereConfig.SwingCancelSpell &&
+                attacker.Spell is Spell spell)
+            {
+                spell.Disturb(Spells.DisturbType.UseRequest);
+            }
+
             //Sphere-style edit: Notify Sphere system of swing begin
             if (Systems.Combat.SphereStyle.SphereConfig.IsEnabled())
             {

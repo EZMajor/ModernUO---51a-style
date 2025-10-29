@@ -137,6 +137,12 @@ public static class SphereConfig
     /// </summary>
     public static bool RestrictedFizzleTriggers { get; set; } = true;
 
+    /// <summary>
+    /// Percentage of mana to deduct at target confirmation when using dual mana deduction.
+    /// Sphere-style: 50 (50% partial, 50% remaining on success)
+    /// </summary>
+    public static int PartialManaPercent { get; set; } = 50;
+
     #endregion
 
     #region Weapon Swing Mechanics
@@ -310,6 +316,40 @@ public static class SphereConfig
         {
             Console.WriteLine($"[Sphere-Combat] {mobile.Name} - {timerName}: {oldValue} -> {newValue}");
         }
+    }
+
+    /// <summary>
+    /// Validate and get the partial mana percentage for dual mana deduction.
+    /// Ensures PartialManaPercent is within valid range [0, 100].
+    /// </summary>
+    /// <returns>The validated partial mana percent (0-100).</returns>
+    public static int GetValidPartialManaPercent()
+    {
+        if (PartialManaPercent < 0)
+        {
+            DebugLog("PartialManaPercent is negative, clamping to 0");
+            return 0;
+        }
+
+        if (PartialManaPercent > 100)
+        {
+            DebugLog("PartialManaPercent exceeds 100, clamping to 100");
+            return 100;
+        }
+
+        return PartialManaPercent;
+    }
+
+    /// <summary>
+    /// Calculate partial mana to deduct at target confirmation.
+    /// Uses validated PartialManaPercent to ensure proper calculations.
+    /// </summary>
+    /// <param name="totalMana">Total mana cost of the spell.</param>
+    /// <returns>The mana to deduct at target confirmation.</returns>
+    public static int CalculatePartialMana(int totalMana)
+    {
+        var validPercent = GetValidPartialManaPercent();
+        return (totalMana * validPercent) / 100;
     }
 
     #endregion
