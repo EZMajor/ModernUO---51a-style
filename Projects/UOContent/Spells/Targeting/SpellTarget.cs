@@ -62,13 +62,10 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
             // This is used to determine if fizzle should occur when replaced by another spell
             spell.HasSelectedTarget = true;
 
-            //Sphere-style edit: Set this spell as the active spell BEFORE canceling others
-            // This prevents Disturb() from clearing Caster.Spell and breaking the current cast
-            from.Spell = spell;
-
             //Sphere-style edit: Cancel any spell that this one replaced when it was selected
             // This handles the case where player queued Spell A, then Spell B, then selected target with B
             // In that case, we stored A in B.ReplacedSpell, now we cancel A
+            // NOTE: Do this BEFORE setting the new spell as active, because Disturb() clears Caster.Spell
             if (spell.ReplacedSpell is Spell replacedSpell)
             {
                 // Only fizzle the replaced spell if it had selected a target
@@ -86,6 +83,10 @@ public class SpellTarget<T> : Target, ISpellTarget<T> where T : class, IPoint3D
 
                 spell.ReplacedSpell = null; // Clear the reference
             }
+
+            //Sphere-style edit: NOW set this spell as the active spell after canceling the replaced spell
+            // This prevents the replaced spell's Disturb() from clearing the new spell
+            from.Spell = spell;
 
             //Sphere-style edit: NOW the spell is actually being cast (target selected)
             // Notify Sphere system of cast begin (cancels bandage/swing)
