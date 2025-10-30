@@ -394,6 +394,45 @@ Status: [PASS] Phase 4.5 spell fizzle fix complete and operational
 
 ---
 
+### [COMPLETE] PHASE 4.6: Scroll Casting Fix
+
+**Duration:** ~2 hours
+**Completed:** 10/30/2025 8:00 PM
+
+#### Issue Resolution:
+
+Fixed critical bug where casting Spell B from a SCROLL while Spell A was in post-target cast delay caused Spell A to fizzle immediately when Spell B's cursor appeared (before any target was selected). Phase 4.5 fixed this for spellbooks, but scrolls still exhibited the fizzle bug.
+
+#### Root Cause:
+
+When a player double-clicks a scroll, Mobile.Use() calls OnCasterUsingObject() on the active spell, which then calls Disturb(DisturbType.UseRequest), clearing Caster.Spell = null. This causes the active spell's CheckSequence() to fail because Caster.Spell != this (null != SpellA). The OnCasterUsingObject() method didn't account for Sphere immediate target mode where spells in post-target cast delay should NOT be disturbed by using items.
+
+#### Solution Implemented:
+
+Modified OnCasterUsingObject() in Spell.cs (lines 182-202) to check if Sphere immediate target mode is enabled and if the spell is in post-target cast delay. If yes, returns immediately WITHOUT calling Disturb(), allowing the spell to complete even when the player uses scrolls.
+
+#### Test Results:
+
+All four test combinations now work correctly:
+- [PASS] Spell A (spellbook) + Spell B (spellbook)
+- [PASS] Spell A (scroll) + Spell B (spellbook)
+- [PASS] Spell A (spellbook) + Spell B (scroll) - Fixed
+- [PASS] Spell A (scroll) + Spell B (scroll) - Fixed
+
+#### Files Modified:
+
+- Projects/UOContent/Spells/Base/Spell.cs (OnCasterUsingObject method)
+
+#### Compilation Status:
+
+- [PASS] All 7 projects compile successfully
+- [PASS] No compilation errors or warnings
+- [PASS] All debug output removed
+
+Status: [PASS] Phase 4.6 scroll casting fix complete and operational
+
+---
+
 ### [PENDING] PHASE 5: Testing & Validation
 
 **Duration:** 2-3 days
@@ -448,8 +487,9 @@ Status: [PASS] Phase 4.5 spell fizzle fix complete and operational
 | Phase 3.5: Double Fizzle Fix | 0.5 hours | [COMPLETE] | 10/29/2025 7:01 PM |
 | Phase 4: Optimization | 1 day | [COMPLETE] | 10/30/2025 |
 | Phase 4.5: Spell Fizzle Fix | 2 hours | [COMPLETE] | 10/30/2025 |
+| Phase 4.6: Scroll Casting Fix | 2 hours | [COMPLETE] | 10/30/2025 8:00 PM |
 | Phase 5: Validation | 2-3 days | [PENDING] | Est. 11/02/2025 |
-| **TOTAL** | **~2 days + 5 hours** | **95% Complete** | **Est. 11/02/2025** |
+| **TOTAL** | **~2 days + 7 hours** | **97% Complete** | **Est. 11/02/2025** |
 
 ---
 
@@ -548,10 +588,10 @@ SphereConfig.WandCancelActions                 // Wand cancels actions
 
 ## Last Updated
 
-**Date:** 10/30/2025
-**Status:** Phases 1-4 Complete [100%], Phase 4.5 Bug Fix [100%], Phase 5 Pending [0%]
-**Project Completion:** 95%
-**Completed:** Phase 4 performance optimization, Phase 4.5 post-target cast delay spell fizzle fix, all documentation updated
+**Date:** 10/30/2025 8:00 PM
+**Status:** Phases 1-4 Complete [100%], Phase 4.5 Bug Fix [100%], Phase 4.6 Scroll Fix [100%], Phase 5 Pending [0%]
+**Project Completion:** 97%
+**Completed:** Phase 4.6 scroll casting fix - all spell casting scenarios now work correctly with both spellbooks and scrolls
 **Next Action:** Begin Phase 5 Testing & Validation
 
 ---
@@ -568,13 +608,14 @@ The following documentation files have been created for this project:
 - **PHASE4_COMPLETION_REPORT.md** - Phase 4 performance optimization completion details
 - **PHASE4_IMPLEMENTATION_REPORT.md** - Phase 4 implementation planning document
 - **PHASE4_PROGRESS_SUMMARY.md** - Phase 4 progress tracking
+- **PHASE4.6_SCROLL_CASTING_FIX.md** - Phase 4.6 scroll casting fix completion details
 - **CLAUDE.md** - This master reference document
 
 ---
 
 ## Project Status Summary
 
-The Sphere 0.51a combat system implementation is 95% complete with all core mechanics and performance optimizations successfully implemented:
+The Sphere 0.51a combat system implementation is 97% complete with all core mechanics and performance optimizations successfully implemented:
 
 ### Completed Components:
 - [x] Independent timer systems (Phase 1)
@@ -583,6 +624,7 @@ The Sphere 0.51a combat system implementation is 95% complete with all core mech
 - [x] Double fizzle bug fix (Phase 3.5)
 - [x] Performance optimization infrastructure (Phase 4)
 - [x] Post-target cast delay spell fizzle fix (Phase 4.5)
+- [x] Scroll casting fix - all spell casting scenarios working (Phase 4.6)
 - [x] All configuration toggles operational
 - [x] Build verification (all 7 projects compile)
 - [x] Comprehensive documentation

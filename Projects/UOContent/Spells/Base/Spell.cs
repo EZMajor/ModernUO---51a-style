@@ -181,6 +181,17 @@ namespace Server.Spells
 
         public virtual bool OnCasterUsingObject(IEntity entity)
         {
+            //Sphere-style edit: In Sphere immediate target mode, don't disturb spells in post-target cast delay
+            // This allows the spell to complete even when using items (like scrolls) afterward
+            var sphereImmediateTargetMode = Systems.Combat.SphereStyle.SphereConfig.IsEnabled() &&
+                                           Systems.Combat.SphereStyle.SphereConfig.ImmediateSpellTarget;
+
+            if (sphereImmediateTargetMode && Caster.SphereIsInCastDelay())
+            {
+                // Spell is in post-target cast delay - allow it to complete
+                return true;
+            }
+
             if (State == SpellState.Sequencing)
             {
                 Disturb(DisturbType.UseRequest);
