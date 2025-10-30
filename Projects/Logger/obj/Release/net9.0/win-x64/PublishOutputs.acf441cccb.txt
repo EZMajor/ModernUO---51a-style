@@ -1,0 +1,6 @@
+E:\Uo Test Shard\Github Repo\ModernUO---51a-style-master\ModernUO---51a-style-master\Distribution\Assemblies\Logger.dll
+E:\Uo Test Shard\Github Repo\ModernUO---51a-style-master\ModernUO---51a-style-master\Distribution\Assemblies\Logger.pdb
+E:\Uo Test Shard\Github Repo\ModernUO---51a-style-master\ModernUO---51a-style-master\Distribution\Assemblies\Serilog.dll
+E:\Uo Test Shard\Github Repo\ModernUO---51a-style-master\ModernUO---51a-style-master\Distribution\Assemblies\Serilog.Sinks.Async.dll
+E:\Uo Test Shard\Github Repo\ModernUO---51a-style-master\ModernUO---51a-style-master\Distribution\Assemblies\Serilog.Sinks.Console.dll
+E:\Uo Test Shard\Github Repo\ModernUO---51a-style-master\ModernUO---51a-style-master\Distribution\Assemblies\Logger.deps.json

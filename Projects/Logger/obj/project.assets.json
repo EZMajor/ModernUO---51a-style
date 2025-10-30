@@ -571,11 +571,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Logger\\Logger.csproj",
+      "projectUniqueName": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Logger\\Logger.csproj",
       "projectName": "Logger",
-      "projectPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Logger\\Logger.csproj",
+      "projectPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Logger\\Logger.csproj",
       "packagesPath": "C:\\Users\\USER-002\\.nuget\\packages\\",
-      "outputPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Logger\\obj\\",
+      "outputPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Logger\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\USER-002\\AppData\\Roaming\\NuGet\\NuGet.Config"

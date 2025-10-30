@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\ModernUoV2\\ModernUO-main\\Projects\\UOContent\\UOContent.csproj": {}
+    "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\UOContent\\UOContent.csproj": {}
   },
   "projects": {
-    "E:\\ModernUoV2\\ModernUO-main\\Projects\\Logger\\Logger.csproj": {
+    "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Logger\\Logger.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Logger\\Logger.csproj",
+        "projectUniqueName": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Logger\\Logger.csproj",
         "projectName": "Logger",
-        "projectPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Logger\\Logger.csproj",
+        "projectPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Logger\\Logger.csproj",
         "packagesPath": "C:\\Users\\USER-002\\.nuget\\packages\\",
-        "outputPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Logger\\obj\\",
+        "outputPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Logger\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\USER-002\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -180,14 +180,14 @@
         }
       }
     },
-    "E:\\ModernUoV2\\ModernUO-main\\Projects\\Server\\Server.csproj": {
+    "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Server\\Server.csproj": {
       "version": "0.0.0",
       "restore": {
-        "projectUniqueName": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Server\\Server.csproj",
+        "projectUniqueName": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Server\\Server.csproj",
         "projectName": "Server",
-        "projectPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Server\\Server.csproj",
+        "projectPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Server\\Server.csproj",
         "packagesPath": "C:\\Users\\USER-002\\.nuget\\packages\\",
-        "outputPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Server\\obj\\",
+        "outputPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Server\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\USER-002\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -202,8 +202,8 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "E:\\ModernUoV2\\ModernUO-main\\Projects\\Logger\\Logger.csproj": {
-                "projectPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Logger\\Logger.csproj"
+              "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Logger\\Logger.csproj": {
+                "projectPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Logger\\Logger.csproj"
               }
             }
           }
@@ -384,14 +384,14 @@
         }
       }
     },
-    "E:\\ModernUoV2\\ModernUO-main\\Projects\\UOContent\\UOContent.csproj": {
+    "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\UOContent\\UOContent.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\ModernUoV2\\ModernUO-main\\Projects\\UOContent\\UOContent.csproj",
+        "projectUniqueName": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\UOContent\\UOContent.csproj",
         "projectName": "UOContent",
-        "projectPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\UOContent\\UOContent.csproj",
+        "projectPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\UOContent\\UOContent.csproj",
         "packagesPath": "C:\\Users\\USER-002\\.nuget\\packages\\",
-        "outputPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\UOContent\\obj\\",
+        "outputPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\UOContent\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\USER-002\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -406,11 +406,11 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "E:\\ModernUoV2\\ModernUO-main\\Projects\\Logger\\Logger.csproj": {
-                "projectPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Logger\\Logger.csproj"
+              "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Logger\\Logger.csproj": {
+                "projectPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Logger\\Logger.csproj"
               },
-              "E:\\ModernUoV2\\ModernUO-main\\Projects\\Server\\Server.csproj": {
-                "projectPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Server\\Server.csproj",
+              "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Server\\Server.csproj": {
+                "projectPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Server\\Server.csproj",
                 "includeAssets": "none",
                 "privateAssets": "all"
               }

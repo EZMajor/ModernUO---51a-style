@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "60071Ili7bA=",
+  "dgSpecHash": "dqjPC++Qx/E=",
   "success": true,
-  "projectFilePath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Server\\Server.csproj",
+  "projectFilePath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Server\\Server.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\USER-002\\.nuget\\packages\\communitytoolkit.highperformance\\8.4.0\\communitytoolkit.highperformance.8.4.0.nupkg.sha512",
     "C:\\Users\\USER-002\\.nuget\\packages\\libdeflate.bindings\\1.0.2.120\\libdeflate.bindings.1.0.2.120.nupkg.sha512",

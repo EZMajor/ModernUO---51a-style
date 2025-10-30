@@ -6423,11 +6423,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\ModernUoV2\\ModernUO-main\\Projects\\UOContent.Tests\\UOContent.Tests.csproj",
+      "projectUniqueName": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\UOContent.Tests\\UOContent.Tests.csproj",
       "projectName": "UOContent.Tests",
-      "projectPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\UOContent.Tests\\UOContent.Tests.csproj",
+      "projectPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\UOContent.Tests\\UOContent.Tests.csproj",
       "packagesPath": "C:\\Users\\USER-002\\.nuget\\packages\\",
-      "outputPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\UOContent.Tests\\obj\\",
+      "outputPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\UOContent.Tests\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\USER-002\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -6442,14 +6442,14 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "E:\\ModernUoV2\\ModernUO-main\\Projects\\Server.Tests\\Server.Tests.csproj": {
-              "projectPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Server.Tests\\Server.Tests.csproj"
+            "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Server.Tests\\Server.Tests.csproj": {
+              "projectPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Server.Tests\\Server.Tests.csproj"
             },
-            "E:\\ModernUoV2\\ModernUO-main\\Projects\\Server\\Server.csproj": {
-              "projectPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\Server\\Server.csproj"
+            "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Server\\Server.csproj": {
+              "projectPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\Server\\Server.csproj"
             },
-            "E:\\ModernUoV2\\ModernUO-main\\Projects\\UOContent\\UOContent.csproj": {
-              "projectPath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\UOContent\\UOContent.csproj"
+            "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\UOContent\\UOContent.csproj": {
+              "projectPath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\UOContent\\UOContent.csproj"
             }
           }
         }

@@ -677,7 +677,13 @@ namespace Server.Spells
                             }
                         }
 
-                        Caster.Spell = this;
+                        //Sphere-style edit: In immediate target mode, don't set as active spell yet
+                        // This allows the previous spell (in post-target cast delay) to complete
+                        // The new spell becomes active when its target is selected in SpellTarget.OnTarget()
+                        if (!sphereImmediateTargetMode)
+                        {
+                            Caster.Spell = this;
+                        }
 
                         if (!isWand && RevealOnCast)
                         {

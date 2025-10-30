@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "a8r93r/5gmU=",
+  "dgSpecHash": "57qQWpdhm70=",
   "success": true,
-  "projectFilePath": "E:\\ModernUoV2\\ModernUO-main\\Projects\\UOContent\\UOContent.csproj",
+  "projectFilePath": "E:\\Uo Test Shard\\Github Repo\\ModernUO---51a-style-master\\ModernUO---51a-style-master\\Projects\\UOContent\\UOContent.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\USER-002\\.nuget\\packages\\argon2.bindings\\1.16.1\\argon2.bindings.1.16.1.nupkg.sha512",
     "C:\\Users\\USER-002\\.nuget\\packages\\bouncycastle.cryptography\\2.5.1\\bouncycastle.cryptography.2.5.1.nupkg.sha512",

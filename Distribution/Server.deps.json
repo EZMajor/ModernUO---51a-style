@@ -1,0 +1,207 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0/win-x64",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {},
+    ".NETCoreApp,Version=v9.0/win-x64": {
+      "Server/0.15.1": {
+        "dependencies": {
+          "CommunityToolkit.HighPerformance": "8.4.0",
+          "LibDeflate.Bindings": "1.0.2.120",
+          "Logger": "1.0.0",
+          "ModernUO.Serialization.Annotations": "2.9.1",
+          "ModernUO.Serialization.Generator": "2.12.20",
+          "Nerdbank.GitVersioning": "3.7.115",
+          "PollGroup": "1.6.1",
+          "Serilog": "4.3.0",
+          "Serilog.Sinks.Async": "2.1.0",
+          "Serilog.Sinks.Console": "6.0.0",
+          "System.IO.Hashing": "9.0.7"
+        },
+        "runtime": {
+          "Server.dll": {}
+        }
+      },
+      "CommunityToolkit.HighPerformance/8.4.0": {
+        "runtime": {
+          "lib/net8.0/CommunityToolkit.HighPerformance.dll": {
+            "assemblyVersion": "8.4.0.0",
+            "fileVersion": "8.4.0.1"
+          }
+        }
+      },
+      "LibDeflate.Bindings/1.0.2.120": {
+        "runtime": {
+          "lib/net8.0/LibDeflate.Bindings.dll": {
+            "assemblyVersion": "1.0.2.120",
+            "fileVersion": "1.0.2.120"
+          }
+        },
+        "native": {
+          "runtimes/win-x64/native/libdeflate.dll": {
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "ModernUO.Serialization.Annotations/2.9.1": {
+        "runtime": {
+          "lib/netstandard2.0/ModernUO.Serialization.Annotations.dll": {
+            "assemblyVersion": "2.9.1.0",
+            "fileVersion": "2.9.1.0"
+          }
+        }
+      },
+      "ModernUO.Serialization.Generator/2.12.20": {},
+      "Nerdbank.GitVersioning/3.7.115": {},
+      "PollGroup/1.6.1": {
+        "runtime": {
+          "lib/net9.0/PollGroup.dll": {
+            "assemblyVersion": "1.6.1.0",
+            "fileVersion": "1.6.1.0"
+          }
+        },
+        "native": {
+          "runtimes/win-x64/native/wepoll.dll": {
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Serilog/4.3.0": {
+        "runtime": {
+          "lib/net9.0/Serilog.dll": {
+            "assemblyVersion": "4.3.0.0",
+            "fileVersion": "4.3.0.0"
+          }
+        }
+      },
+      "Serilog.Sinks.Async/2.1.0": {
+        "dependencies": {
+          "Serilog": "4.3.0"
+        },
+        "runtime": {
+          "lib/net8.0/Serilog.Sinks.Async.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
+          }
+        }
+      },
+      "Serilog.Sinks.Console/6.0.0": {
+        "dependencies": {
+          "Serilog": "4.3.0"
+        },
+        "runtime": {
+          "lib/net8.0/Serilog.Sinks.Console.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.0.0"
+          }
+        }
+      },
+      "System.IO.Hashing/9.0.7": {
+        "runtime": {
+          "lib/net9.0/System.IO.Hashing.dll": {
+            "assemblyVersion": "9.0.0.7",
+            "fileVersion": "9.0.725.31616"
+          }
+        }
+      },
+      "Logger/1.0.0": {
+        "dependencies": {
+          "Serilog": "4.3.0",
+          "Serilog.Sinks.Async": "2.1.0",
+          "Serilog.Sinks.Console": "6.0.0"
+        },
+        "runtime": {
+          "Logger.dll": {
+            "assemblyVersion": "0.15.0.0",
+            "fileVersion": "0.15.1.7"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Server/0.15.1": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "CommunityToolkit.HighPerformance/8.4.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-flxspiBs0G/0GMp7IK2J2ijV9bTG6hEwFc/z6ekHqB6nwRJ4Ry2yLdx+TkbCUYFCl4XhABkAwomeKbT6zM2Zlg==",
+      "path": "communitytoolkit.highperformance/8.4.0",
+      "hashPath": "communitytoolkit.highperformance.8.4.0.nupkg.sha512"
+    },
+    "LibDeflate.Bindings/1.0.2.120": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-LnVFG0InUjkN9qhaLs/vdqYLvNfWZ3iEgOc0l1y0Wr/yFl58i3GErOO9DW0bLHw1jihJIZXWSYX6M6uv30mi8Q==",
+      "path": "libdeflate.bindings/1.0.2.120",
+      "hashPath": "libdeflate.bindings.1.0.2.120.nupkg.sha512"
+    },
+    "ModernUO.Serialization.Annotations/2.9.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-WryDYdfakzZgfu0I4cibNTXHcZxeEXB4+PyeudyWhyd8wVc5cOmFyhhobS1/PHPK8YnxbntnaRTAQokG3pauNg==",
+      "path": "modernuo.serialization.annotations/2.9.1",
+      "hashPath": "modernuo.serialization.annotations.2.9.1.nupkg.sha512"
+    },
+    "ModernUO.Serialization.Generator/2.12.20": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-H8Sfk+dpLBXG1RRAfnMypev5BgIRPQ/YMIOtw+MkMGi8lPwCrDiYgSlLm0IReOZKESjc4ABSk5tPhdflBaSaXA==",
+      "path": "modernuo.serialization.generator/2.12.20",
+      "hashPath": "modernuo.serialization.generator.2.12.20.nupkg.sha512"
+    },
+    "Nerdbank.GitVersioning/3.7.115": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-EpXamaAdRfG/BMxGgvZlTM0npRnkmXUjAj8OdNKd17t4oN+2nvjdv/KnFmzOOMDqvlwB49UCwtOHJrAQTfUBtQ==",
+      "path": "nerdbank.gitversioning/3.7.115",
+      "hashPath": "nerdbank.gitversioning.3.7.115.nupkg.sha512"
+    },
+    "PollGroup/1.6.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-2NtGuj45RnoM3CYgvVGdftGROvBHrCzKGPJfc+rSBBBG+9Do/kl8tH7GeUlmvPs2ulRF8tYKhAzuF7c9OMD1Uw==",
+      "path": "pollgroup/1.6.1",
+      "hashPath": "pollgroup.1.6.1.nupkg.sha512"
+    },
+    "Serilog/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+cDryFR0GRhsGOnZSKwaDzRRl4MupvJ42FhCE4zhQRVanX0Jpg6WuCBk59OVhVDPmab1bB+nRykAnykYELA9qQ==",
+      "path": "serilog/4.3.0",
+      "hashPath": "serilog.4.3.0.nupkg.sha512"
+    },
+    "Serilog.Sinks.Async/2.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-SnmRknWsSMgyo9wDXeZZCqSp48kkQYy44taSM6vcpxfiRICzSf09oLKEmVr0RCwQnfd8mJQ2WNN6nvhqf0RowQ==",
+      "path": "serilog.sinks.async/2.1.0",
+      "hashPath": "serilog.sinks.async.2.1.0.nupkg.sha512"
+    },
+    "Serilog.Sinks.Console/6.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-fQGWqVMClCP2yEyTXPIinSr5c+CBGUvBybPxjAGcf7ctDhadFhrQw03Mv8rJ07/wR5PDfFjewf2LimvXCDzpbA==",
+      "path": "serilog.sinks.console/6.0.0",
+      "hashPath": "serilog.sinks.console.6.0.0.nupkg.sha512"
+    },
+    "System.IO.Hashing/9.0.7": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-2sMrwd/AHYipeiOwYcoqD99c4U8F2x7GalonEYxkHUvTLNzE9Pxx2lz8ygS9cOqyDsruYARZAYL5pPVFh/s3lw==",
+      "path": "system.io.hashing/9.0.7",
+      "hashPath": "system.io.hashing.9.0.7.nupkg.sha512"
+    },
+    "Logger/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

@@ -1,0 +1,35 @@
+##############################
+Log started on 10/30/2025 15:27:07
+
+10/30/2025 15:27:55: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'go '
+10/30/2025 15:29:00: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'addbetateststone '
+10/30/2025 15:29:01: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') created a Beta Test Stone at (1431, 1696, 0) in Felucca
+10/30/2025 15:29:03: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'admin '
+10/30/2025 15:29:08: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'GenerateSpawners Data/Spawns/post-uoml/malas/**.json'
+10/30/2025 15:29:08: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'GenerateSpawners Data/Spawns/post-uoml/tokuno/**.json'
+10/30/2025 15:29:08: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'GenerateSpawners Data/Spawns/post-uoml/ilshenar/**.json'
+10/30/2025 15:29:08: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'GenerateSpawners Data/Spawns/post-uoml/trammel/**.json'
+10/30/2025 15:29:08: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'GenerateSpawners Data/Spawns/post-uoml/felucca/**.json'
+10/30/2025 15:29:26: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'doorgen '
+10/30/2025 15:29:28: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'telgen '
+10/30/2025 15:30:07: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'dupe '
+10/30/2025 15:30:08: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') duping 0x4001DD2F (LightningScroll) (inBag=False; amount=1)
+10/30/2025 15:30:08: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') duped 0x4001DD2F (LightningScroll) creating 0x4001F518 (LightningScroll)
+10/30/2025 15:30:09: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'dupe '
+10/30/2025 15:30:09: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') duping 0x4001DD2F (LightningScroll) (inBag=False; amount=1)
+10/30/2025 15:30:09: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') duped 0x4001DD2F (LightningScroll) creating 0x4001F519 (LightningScroll)
+10/30/2025 15:30:12: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'dupe '
+10/30/2025 15:30:12: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') duping 0x4001F519 (LightningScroll) (inBag=False; amount=1)
+10/30/2025 15:30:12: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') duped 0x4001F519 (LightningScroll) creating 0x4001F51A (LightningScroll)
+10/30/2025 15:30:13: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'dupe '
+10/30/2025 15:30:13: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') duping 0x4001F51A (LightningScroll) (inBag=False; amount=1)
+10/30/2025 15:30:13: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') duped 0x4001F51A (LightningScroll) creating 0x4001F51B (LightningScroll)
+10/30/2025 15:30:20: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'admin '
+10/30/2025 15:30:24: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') set property 'Blessed' of 0x00000001 "Alastor" ('Alastor') to 'False'
+10/30/2025 15:30:34: 192.168.2.18: Owner 0x00000001 "Alastor" ('Alastor') used command 'go '
+##############################
+Log started on 10/30/2025 15:43:43
+
+##############################
+Log started on 10/30/2025 15:54:54
+
