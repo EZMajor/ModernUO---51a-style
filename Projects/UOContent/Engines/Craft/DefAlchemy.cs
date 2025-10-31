@@ -116,6 +116,22 @@ public class DefAlchemy : CraftSystem
         );
         AddRes(index, typeof(Bottle), 1044529, 1, 500315);
 
+        // Mana Potion
+        index = AddCraft(typeof(ManaPotion), 1116357, 1041337, 75.0, 125.0, typeof(BatWing), 1023966, 4, 1044253);
+        AddRes(index, typeof(Bottle), 1044529, 1, 500315);
+        index = AddCraft(
+            typeof(GreaterManaPotion),
+            1116357,
+            1041339,
+            100.0,
+            150.0,
+            typeof(BatWing),
+            1023966,
+            8,
+            1044253
+        );
+        AddRes(index, typeof(Bottle), 1044529, 1, 500315);
+
         // Nightsight Potion
         index = AddCraft(
             typeof(NightSightPotion),

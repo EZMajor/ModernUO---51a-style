@@ -27,7 +27,7 @@ public partial class BetaTestStone : Item
     public BetaTestStone() : base(0xED4) // Gravestone ItemID
     {
         Movable = false;
-        Hue = 0x486; // Blue color
+        Hue = 0x0AD6; // Custom color
     }
 
     /// <summary>
@@ -162,14 +162,15 @@ public class BetaTestStoneGump : Gump
     /// - Sets all stats (Str, Dex, Int) to 100
     /// - Fully restores health, stamina, and mana
     /// - Adds the following to the player's bank box:
-    ///   * Weapons and armor (Katana, Plate Gorget, Plate Arms)
+    ///   * Weapon (Katana)
+    ///   * Armor bag (full plate suit + Heater Shield)
     ///   * 5000 gold
     ///   * Full spellbook with all spells
     ///   * Runebook
     ///   * Reagents bag (1000 of each reagent)
     ///   * Tools bag (crafting tools with charges)
     ///   * Resources bag (1000 ingots, logs, cloth, leather)
-    ///   * Consumables bag (100 potions and scrolls)
+    ///   * Consumables bag (100 heal potions, 100 refresh potions, 400 scrolls - all stacked)
     /// </remarks>
     private void SetupBetaTester(Mobile from)
     {
@@ -204,11 +205,21 @@ public class BetaTestStoneGump : Gump
             var katana = new Katana();
             bankBox.AddItem(katana);
 
-            // Add armor
-            var gorget = new PlateGorget();
-            var arms = new PlateArms();
-            bankBox.AddItem(gorget);
-            bankBox.AddItem(arms);
+            // Add full plate armor suit in its own bag
+            var armorBag = new Bag
+            {
+                Name = "Beta Tester Armor"
+            };
+
+            armorBag.AddItem(new PlateHelm());
+            armorBag.AddItem(new PlateGorget());
+            armorBag.AddItem(new PlateArms());
+            armorBag.AddItem(new PlateGloves());
+            armorBag.AddItem(new PlateChest());
+            armorBag.AddItem(new PlateLegs());
+            armorBag.AddItem(new HeaterShield());
+
+            bankBox.AddItem(armorBag);
 
             // Add gold
             var gold = new Gold(5000);
@@ -277,37 +288,31 @@ public class BetaTestStoneGump : Gump
                 Name = "Beta Tester Consumables"
             };
 
-            // Add potions - create multiple individual items
-            for (int i = 0; i < 100; i++)
-            {
-                consumablesBag.AddItem(new GreaterHealPotion());
-            }
-            for (int i = 0; i < 100; i++)
-            {
-                consumablesBag.AddItem(new HealPotion());
-            }
-            for (int i = 0; i < 100; i++)
-            {
-                consumablesBag.AddItem(new TotalRefreshPotion());
-            }
+            // Add potions - stacked
+            var healPotions = new HealPotion();
+            healPotions.Amount = 100;
+            consumablesBag.AddItem(healPotions);
 
-            // Add scrolls - create multiple individual items
-            for (int i = 0; i < 100; i++)
-            {
-                consumablesBag.AddItem(new LightningScroll());
-            }
-            for (int i = 0; i < 100; i++)
-            {
-                consumablesBag.AddItem(new GreaterHealScroll());
-            }
-            for (int i = 0; i < 100; i++)
-            {
-                consumablesBag.AddItem(new FlamestrikeScroll());
-            }
-            for (int i = 0; i < 100; i++)
-            {
-                consumablesBag.AddItem(new MagicReflectScroll());
-            }
+            var refreshPotions = new TotalRefreshPotion();
+            refreshPotions.Amount = 100;
+            consumablesBag.AddItem(refreshPotions);
+
+            // Add scrolls - stacked
+            var lightningScrolls = new LightningScroll();
+            lightningScrolls.Amount = 100;
+            consumablesBag.AddItem(lightningScrolls);
+
+            var greaterHealScrolls = new GreaterHealScroll();
+            greaterHealScrolls.Amount = 100;
+            consumablesBag.AddItem(greaterHealScrolls);
+
+            var flamestrikeScrolls = new FlamestrikeScroll();
+            flamestrikeScrolls.Amount = 100;
+            consumablesBag.AddItem(flamestrikeScrolls);
+
+            var magicReflectScrolls = new MagicReflectScroll();
+            magicReflectScrolls.Amount = 100;
+            consumablesBag.AddItem(magicReflectScrolls);
 
             bankBox.AddItem(consumablesBag);
         }
