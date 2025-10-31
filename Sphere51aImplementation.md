@@ -302,14 +302,14 @@ When a player cast Spell B while Spell A was in its post-target cast delay phase
 2. Spell A: Target selected
 3. Spell A: Enters post-target cast delay (animation playing)
 4. Spell B: Cast and cursor appears
-5. **Spell A: Fizzles prematurely** ✗
+5. **Spell A: Fizzles prematurely** [WRONG]
 
 **Expected Behavior (CORRECT):**
 1. Spell A: Target cursor appears
 2. Spell A: Target selected
 3. Spell A: Enters post-target cast delay (animation playing)
 4. Spell B: Cast and cursor appears
-5. **Spell A: Completes and hits target** ✓
+5. **Spell A: Completes and hits target** [CORRECT]
 6. Spell B: Cursor waits for target selection
 
 **Additional Expected Behavior:**

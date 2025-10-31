@@ -389,7 +389,7 @@ SphereConfig.cs (30+ toggles)
 
 ## Documentation References
 
-- Main Implementation: Claude.md
+- Main Implementation: Sphere51aImplementation.md
 - Phase 1 Report: PHASE1_COMPLETION_REPORT.md
 - Phase 2 Report: PHASE2_COMPLETION_REPORT.md
 - Phase 2 Guide: PHASE2_IMPLEMENTATION_GUIDE.md

@@ -590,7 +590,7 @@ Implement complete Sphere 0.51a-style combat mechanics for ModernUO.
 ### Documentation
 - **Implementation Guide:** [Projects/UOContent/Systems/Combat/SphereStyle/README.md](Projects/UOContent/Systems/Combat/SphereStyle/README.md)
 - **Specification:** [Sphere0.51aCombatSystem.md](Sphere0.51aCombatSystem.md)
-- **Development Standards:** [CLAUDE.md](CLAUDE.md)
+- **Development Standards:** [Sphere51aImplementation.md](Sphere51aImplementation.md)
 
 ### Issue Tracking
 - **Repository:** https://github.com/EZMajor/ModernUO---51a-style
@@ -640,7 +640,7 @@ The Sphere 0.51a combat system framework is complete and ready for integration. 
 ### Documentation Files (All Complete)
 - `SPHERE_IMPLEMENTATION_SUMMARY.md` - This document
 - `Sphere0.51aCombatSystem.md` - Specification (199 lines)
-- `CLAUDE.md` - Development standards (existing)
+- `Sphere51aImplementation.md` - Development standards (existing)
 
 ### Total Lines of Code
 - **System Code:** ~1,832 lines
@@ -650,5 +650,4 @@ The Sphere 0.51a combat system framework is complete and ready for integration. 
 ---
 
 **Document Version:** 1.0.0
-**Last Updated:** 2025-10-24
-**Maintained By:** EZMajor
+**Last Updated:** 2025-10-30

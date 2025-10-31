@@ -1,12 +1,5 @@
 # Phase 2 Implementation Guide: Complete Spellcasting Integration
 
-**Start Date:** 10/29/2025 1:18 PM  
-**Planning Complete:** 10/29/2025 2:32 PM  
-**Phase:** 2 of 5  
-**Status:** READY FOR IMPLEMENTATION  
-**Duration:** Estimated 3-4 days  
-**Architecture Analysis:** COMPLETE
-
 ---
 
 ## Overview
@@ -378,7 +371,7 @@ Status: All supporting methods present
 
 ## References
 
-- **Main Plan:** Claude.md - Phase 2 Section
+- **Main Plan:** Sphere51aImplementation.md - Phase 2 Section
 - **Sphere Rules:** Sphere0.51aCombatSystem.md - Section 2.2
 - **Spell Code:** Projects/UOContent/Spells/Base/Spell.cs
 - **Target Code:** Projects/UOContent/Spells/Targeting/SpellTarget.cs

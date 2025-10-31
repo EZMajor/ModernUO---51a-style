@@ -332,7 +332,7 @@ SphereConfig.LogTimerStateChanges = true;      // Log timer updates
 
 ## Credits
 
-Implementation by Claude (Anthropic) for EZMajor's ModernUO Sphere 0.51a style server.
+ModernUO Sphere 0.51a style server implementation.
 
 Repository: https://github.com/EZMajor/ModernUO---51a-style
 

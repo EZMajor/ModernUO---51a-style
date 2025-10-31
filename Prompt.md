@@ -1,11 +1,10 @@
-You are working inside Visual Studio Code on the repository:
-https://github.com/EZMajor/ModernUO---51a-style
+Repository: https://github.com/EZMajor/ModernUO---51a-style
 
 Step 1 — Reference Documents
 
 Read and apply all guidance from:
 
-Claude.md — coding standards, communication protocols, and C# best practices.
+Sphere51aImplementation.md — coding standards, communication protocols, and C# best practices.
 
 Sphere0.51aCombatSystem.md — defines the full Sphere 0.51a-style combat system logic, timing, and behavioural rules.
 
