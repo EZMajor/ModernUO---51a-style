@@ -1,0 +1,56 @@
+{
+  "version": 0,
+  "type": "Server.Engines.DuelArena.DuelArena",
+  "properties": [
+    {
+      "name": "Name",
+      "type": "string",
+      "rule": "PrimitiveTypeMigrationRule",
+      "ruleArguments": [
+        ""
+      ]
+    },
+    {
+      "name": "SpawnPoints",
+      "type": "Server.Point3D[]",
+      "rule": "ArrayMigrationRule",
+      "ruleArguments": [
+        "Server.Point3D",
+        "PrimitiveUOTypeMigrationRule",
+        "Point3D"
+      ]
+    },
+    {
+      "name": "Bounds",
+      "type": "Server.Rectangle2D",
+      "rule": "PrimitiveUOTypeMigrationRule",
+      "ruleArguments": [
+        "Rect2D"
+      ]
+    },
+    {
+      "name": "Map",
+      "type": "Server.Map",
+      "rule": "PrimitiveUOTypeMigrationRule",
+      "ruleArguments": [
+        "Map"
+      ]
+    },
+    {
+      "name": "ExitLocation",
+      "type": "Server.Point3D",
+      "rule": "PrimitiveUOTypeMigrationRule",
+      "ruleArguments": [
+        "Point3D"
+      ]
+    },
+    {
+      "name": "MaxPlayers",
+      "type": "int",
+      "rule": "PrimitiveTypeMigrationRule",
+      "ruleArguments": [
+        ""
+      ]
+    }
+  ]
+}

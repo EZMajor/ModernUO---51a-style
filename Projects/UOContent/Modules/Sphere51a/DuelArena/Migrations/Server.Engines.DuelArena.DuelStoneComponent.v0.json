@@ -1,0 +1,11 @@
+{
+  "version": 0,
+  "type": "Server.Engines.DuelArena.DuelStoneComponent",
+  "properties": [
+    {
+      "name": "DuelStone",
+      "type": "Server.Engines.DuelArena.DuelStone",
+      "rule": "SerializableInterfaceMigrationRule"
+    }
+  ]
+}
