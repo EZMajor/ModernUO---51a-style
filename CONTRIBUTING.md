@@ -3,7 +3,7 @@
 One of the easiest ways to contribute is to participate in discussions on GitHub issues. You can also contribute by submitting pull requests with code changes.
 
 ## Bugs, feature requests, feedback, and general discussions?
-Start a discussion on the [repository issue tracker](https://github.com/modernuo/modernuo/issues).
+Start a discussion on the [repository issue tracker](https://github.com/EZMajor/51a-style-ModernUo/issues).
 
 ## Reporting security issues and bugs
 Security issues and bugs should be reported privately, via email, to hi@modernuo.com.
@@ -21,8 +21,8 @@ Our team members also monitor several other discussion forums:
 
 We accept fixes and features! Here are some resources to help you get started on how to contribute code or new content.
 
-* ["Help wanted" issues](https://github.com/modernuo/modernuo/labels/help%20wanted) - these issues are up for grabs. Comment on an issue if you want to create a fix.
-* ["Good first issue" issues](https://github.com/modernuo/modernuo/labels/good%20first%20issue) - we think these are a good for newcomers.
+* ["Help wanted" issues](https://github.com/EZMajor/51a-style-ModernUo/labels/help%20wanted) - these issues are up for grabs. Comment on an issue if you want to create a fix.
+* ["Good first issue" issues](https://github.com/EZMajor/51a-style-ModernUo/labels/good%20first%20issue) - we think these are a good for newcomers.
 
 ### Submitting a pull request
 
