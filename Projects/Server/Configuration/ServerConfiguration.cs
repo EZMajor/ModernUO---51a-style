@@ -287,6 +287,14 @@ public static class ServerConfiguration
 
         Core.Expansion = currentExpansion;
 
+        // Check if Sphere51a setting exists, if not, prompt for it
+        if (!_settings.Settings.ContainsKey("sphere51a.enabled"))
+        {
+            var enableSphere51a = ServerConfigurationPrompts.GetSphere51aEnabled();
+            _settings.Settings["sphere51a.enabled"] = enableSphere51a.ToString().ToLowerInvariant();
+            updated = true;
+        }
+
         if (updated)
         {
             Save();

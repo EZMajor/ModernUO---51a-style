@@ -12,6 +12,7 @@ using System;
 using System.IO;
 using Server.Logging;
 using Server.Modules.Sphere51a.Combat;
+using Server.Modules.Sphere51a.Combat.Audit;
 using Server.Modules.Sphere51a.Configuration;
 using Server.Modules.Sphere51a.Core;
 using Server.Modules.Sphere51a.DuelArena;
@@ -61,14 +62,38 @@ public static class Sphere51aModule
         {
             logger.Information("Initializing Sphere 51a Module v{Version}", Version);
 
-            // Load module configuration
-            var config = ModuleConfig.Config;
+            // CRITICAL: Handle configuration FIRST, before any other initialization
+            // This prevents SphereConfiguration.Initialize() from creating defaults
+            var config = ModuleConfig.LoadConfig();
 
-            // Migrate from global config if needed
-            if (!File.Exists(ModuleConfig.ConfigPath))
+            if (config == null)
             {
-                ModuleConfig.MigrateFromGlobalConfig();
+                // Read from ServerConfiguration (prompt happens during server startup)
+                var enabled = ServerConfiguration.GetSetting("sphere51a.enabled", false);
+                logger.Information("[Sphere-Config] No existing module config found, reading from ServerConfiguration: {Enabled}", enabled);
+
+                // Create config from ServerConfiguration setting
+                config = new Sphere51aConfig
+                {
+                    Enabled = enabled,
+                    UseGlobalPulse = true,
+                    GlobalTickMs = 50,
+                    CombatIdleTimeoutMs = 30000,
+                    IndependentTimers = false,
+                    WeaponTimingConfigPath = "Data/Sphere51a/weapons_timing.json"
+                };
+
+                ModuleConfig.SaveConfig(config);
+                logger.Information("[Sphere-Config] Sphere 51a module config created from ServerConfiguration - Enabled: {Enabled}", enabled);
             }
+
+            // Set the loaded/created config BEFORE initializing subsystems
+            ModuleConfig.SetConfig(config);
+
+            // CRITICAL: Sync to SphereConfiguration BEFORE calling SphereInitializer
+            // This ensures SphereConfiguration.Enabled matches the user's choice from ModuleConfig
+            SphereConfiguration.Enabled = config.Enabled;
+            logger.Information("[Sphere-Config] Synced config to SphereConfiguration.Enabled = {Enabled}", config.Enabled);
 
             // Register with module registry
             ModuleRegistry.Register("Sphere51a", new Sphere51aModuleInstance());
@@ -92,6 +117,18 @@ public static class Sphere51aModule
 
             SphereDuelArena.Initialize();
             SphereBetaTestStone.Initialize();
+
+            // Initialize the combat audit system if enabled
+            if (SphereConfiguration.Enabled && SphereConfiguration.Audit?.Enabled == true)
+            {
+                CombatAuditSystem.Initialize(SphereConfiguration.Audit);
+                logger.Information("Combat Audit System initialized (Level: {Level}, Buffer: {BufferSize})",
+                    SphereConfiguration.Audit.Level, SphereConfiguration.Audit.BufferSize);
+            }
+            else
+            {
+                logger.Debug("Combat Audit System disabled by configuration");
+            }
 
             IsInitialized = true;
 
@@ -140,34 +177,6 @@ public static class Sphere51aModule
         logger.Debug("Subscribed to {Count} event types", 11);
     }
 
-    /// <summary>
-    /// Configures the module during the Configure phase.
-    /// </summary>
-    public static void Configure()
-    {
-        if (!IsInitialized)
-        {
-            logger.Warning("Cannot configure Sphere 51a module - not initialized");
-            return;
-        }
-
-        try
-        {
-            // Load configuration settings now that ServerConfiguration is available
-            SphereConfiguration.Configure();
-
-            // Configure subsystems
-            SphereCombatSystem.Configure();
-            SphereDuelArena.Configure();
-            SphereBetaTestStone.Configure();
-
-            logger.Debug("Sphere 51a module configured");
-        }
-        catch (Exception ex)
-        {
-            logger.Error(ex, "Failed to configure Sphere 51a module");
-        }
-    }
 
     /// <summary>
     /// Performs final initialization during the Initialize phase.
@@ -195,10 +204,43 @@ public static class Sphere51aModule
     }
 
     /// <summary>
+    /// Shuts down the module and all subsystems.
+    /// </summary>
+    public static void Shutdown()
+    {
+        if (!IsInitialized)
+            return;
+
+        try
+        {
+            logger.Information("Shutting down Sphere 51a Module...");
+
+            // Shutdown audit system first to ensure all data is flushed
+            if (CombatAuditSystem.IsInitialized)
+            {
+                CombatAuditSystem.Shutdown();
+            }
+
+            // Shutdown other subsystems
+            // (Add other shutdown calls here as needed)
+
+            logger.Information("Sphere 51a Module shutdown complete");
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex, "Error during Sphere 51a module shutdown");
+        }
+    }
+
+    /// <summary>
     /// Gets the module status for diagnostics.
     /// </summary>
     public static string GetStatus()
     {
+        var auditStatus = CombatAuditSystem.IsInitialized
+            ? $"Enabled (Level: {CombatAuditSystem.Config?.Level}, Buffer: {CombatAuditSystem.BufferCount}/{CombatAuditSystem.Config?.BufferSize})"
+            : "Disabled";
+
         return $@"
 Sphere 51a Module Status:
 - Version: {Version}
@@ -207,6 +249,7 @@ Sphere 51a Module Status:
 - Combat System: {SphereCombatSystem.GetStatus()}
 - Duel Arena: {SphereDuelArena.GetStatus()}
 - Beta Test Stone: {SphereBetaTestStone.GetStatus()}
+- Audit System: {auditStatus}
 ".Trim();
     }
 

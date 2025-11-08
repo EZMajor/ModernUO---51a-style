@@ -168,4 +168,40 @@ public static class ServerConfigurationPrompts
         } while (true);
         return ips;
     }
+
+    internal static bool GetSphere51aEnabled()
+    {
+        Console.WriteLine();
+        Console.WriteLine("Choose your combat system:");
+        Console.WriteLine("  1. ModernUO Style (default UO mechanics)");
+        Console.WriteLine("  2. Sphere 51a Style (classic Sphere mechanics)");
+
+        do
+        {
+            Console.Write("[1] or 2> ");
+            var input = Console.ReadLine()?.Trim();
+
+            if (string.IsNullOrWhiteSpace(input) || input == "1")
+            {
+                Utility.PushColor(ConsoleColor.Yellow);
+                Console.WriteLine("ModernUO Style chosen.");
+                Utility.PopColor();
+                return false;
+            }
+
+            if (input == "2")
+            {
+                Utility.PushColor(ConsoleColor.Yellow);
+                Console.WriteLine("Sphere 51a Style chosen.");
+                Utility.PopColor();
+                return true;
+            }
+
+            Console.Write("Invalid option ");
+            Utility.PushColor(ConsoleColor.Red);
+            Console.Write(input);
+            Utility.PopColor();
+            Console.WriteLine(". Press 1 for ModernUO or 2 for Sphere 51a.");
+        } while (true);
+    }
 }

@@ -197,6 +197,10 @@ public static class SphereInitializer
         Commands.SphereLoadTest.Initialize();
         Commands.SpherePerfReport.Initialize();
 
+        // Register audit system commands
+        Commands.VerifyTimingAccuracy.Initialize();
+        Commands.SphereCombatAudit.Initialize();
+
         logger.Debug("Commands registered");
     }
 

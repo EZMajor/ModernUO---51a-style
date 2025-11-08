@@ -11,6 +11,8 @@
 using System;
 using Server.Logging;
 using Server.Mobiles;
+using Server.Modules.Sphere51a.Combat.Audit;
+using Server.Modules.Sphere51a.Core;
 
 namespace Server.Modules.Sphere51a.Configuration;
 
@@ -25,7 +27,7 @@ public static class SphereConfiguration
     /// Master toggle for Sphere 51a combat system.
     /// When false, all Sphere-style modifications are disabled.
     /// </summary>
-    public static bool Enabled { get; private set; }
+    public static bool Enabled { get; set; }
 
     /// <summary>
     /// Whether the configuration has been initialized.
@@ -290,29 +292,83 @@ public static class SphereConfiguration
 
     /// <summary>
     /// Enable detailed combat logging for debugging.
+    /// Maps to Audit.Level >= AuditLevel.Debug
     /// </summary>
-    public static bool EnableDebugLogging { get; set; } = false;
+    public static bool EnableDebugLogging
+    {
+        get => Audit != null && Audit.Level >= AuditLevel.Debug;
+        set
+        {
+            if (Audit != null)
+            {
+                Audit.Level = value ? AuditLevel.Debug : AuditLevel.Standard;
+            }
+        }
+    }
 
     /// <summary>
     /// Log action cancellations to console.
+    /// Maps to Audit.Level >= AuditLevel.Detailed
     /// </summary>
-    public static bool LogActionCancellations { get; set; } = false;
+    public static bool LogActionCancellations
+    {
+        get => Audit != null && Audit.Level >= AuditLevel.Detailed;
+        set
+        {
+            if (Audit != null && value)
+            {
+                Audit.Level = AuditLevel.Detailed;
+            }
+        }
+    }
 
     /// <summary>
     /// Log timer state changes to console.
+    /// Maps to Audit.Level >= AuditLevel.Detailed
     /// </summary>
-    public static bool LogTimerStateChanges { get; set; } = false;
+    public static bool LogTimerStateChanges
+    {
+        get => Audit != null && Audit.Level >= AuditLevel.Detailed;
+        set
+        {
+            if (Audit != null && value)
+            {
+                Audit.Level = AuditLevel.Detailed;
+            }
+        }
+    }
 
     /// <summary>
     /// Enable shadow mode logging to compare new vs legacy timing systems.
+    /// Maps to Audit.EnableShadowMode
     /// </summary>
-    public static bool EnableShadowLogging { get; set; } = false;
+    public static bool EnableShadowLogging
+    {
+        get => Audit?.EnableShadowMode ?? false;
+        set
+        {
+            if (Audit != null)
+            {
+                Audit.EnableShadowMode = value;
+            }
+        }
+    }
+
+    #endregion
+
+    #region Combat Audit System
+
+    /// <summary>
+    /// Combat audit system configuration.
+    /// Provides real-time monitoring, verification, and persistent logging.
+    /// </summary>
+    public static AuditConfig Audit { get; private set; }
 
     #endregion
 
     /// <summary>
-    /// Initializes the configuration system with defaults.
-    /// Called early in startup before ServerConfiguration is loaded.
+    /// Initializes the configuration system from ModuleConfig.
+    /// This is called after ModuleConfig has been loaded/created.
     /// </summary>
     public static void Initialize()
     {
@@ -322,40 +378,28 @@ public static class SphereConfiguration
             return;
         }
 
-        // Try to read the setting immediately (ServerConfiguration might be loaded by now)
-        try
+        // Read from ModuleConfig (the single source of truth)
+        var config = ModuleConfig.Config;
+        if (config != null)
         {
-            Enabled = Server.ServerConfiguration.GetSetting("sphere.enableSphere51aStyle", false);
-            logger.Information("Sphere configuration initialized - Enabled: {Enabled}", Enabled);
+            Enabled = config.Enabled;
+
+            // Initialize audit configuration
+            Audit = config.Audit ?? new AuditConfig();
+            Audit.Validate();
+
+            logger.Information("Sphere configuration initialized from ModuleConfig - Enabled: {Enabled}, Audit: {AuditEnabled}",
+                Enabled, Audit.Enabled);
         }
-        catch
+        else
         {
-            // ServerConfiguration not loaded yet, use defaults
-            Enabled = false; // Default to disabled until settings are loaded
-            logger.Information("Sphere configuration initialized with defaults - Enabled: {Enabled} (will retry in Configure)", Enabled);
+            // Fallback if config hasn't been loaded yet
+            Enabled = false;
+            Audit = new AuditConfig { Enabled = false };
+            logger.Warning("ModuleConfig not loaded yet, defaulting to disabled");
         }
 
         IsInitialized = true;
-    }
-
-    /// <summary>
-    /// Configures the system after ServerConfiguration is loaded.
-    /// Loads settings from ServerConfiguration.
-    /// </summary>
-    public static void Configure()
-    {
-        try
-        {
-            // Load master toggle from server configuration
-            Enabled = Server.ServerConfiguration.GetSetting("sphere.enableSphere51aStyle", false);
-
-            logger.Information("Sphere configuration updated from settings - Enabled: {Enabled}", Enabled);
-        }
-        catch (Exception ex)
-        {
-            logger.Error(ex, "Failed to configure Sphere settings");
-            // Don't throw - allow system to continue with defaults
-        }
     }
 
     #region Helper Methods

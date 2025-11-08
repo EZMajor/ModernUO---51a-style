@@ -11,6 +11,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 using Server.Logging;
+using Server.Modules.Sphere51a.Combat.Audit;
 
 namespace Server.Modules.Sphere51a.Core;
 
@@ -33,7 +34,16 @@ public static class ModuleConfig
     public static Sphere51aConfig Config => _config ??= LoadConfig();
 
     /// <summary>
-    /// Loads configuration from file, with defaults if file doesn't exist.
+    /// Sets the current configuration (for internal use).
+    /// </summary>
+    internal static void SetConfig(Sphere51aConfig config)
+    {
+        _config = config;
+    }
+
+    /// <summary>
+    /// Loads configuration from file, returns null if file doesn't exist.
+    /// Does NOT create default config.
     /// </summary>
     public static Sphere51aConfig LoadConfig()
     {
@@ -51,16 +61,13 @@ public static class ModuleConfig
                 }
             }
 
-            // Create default config
-            var defaultConfig = new Sphere51aConfig();
-            SaveConfig(defaultConfig);
-            logger.Information("Created default Sphere51a configuration");
-            return defaultConfig;
+            logger.Debug("No existing Sphere51a configuration file found");
+            return null;
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Failed to load Sphere51a configuration, using defaults");
-            return new Sphere51aConfig();
+            logger.Error(ex, "Failed to load Sphere51a configuration");
+            return null;
         }
     }
 
@@ -137,4 +144,10 @@ public class Sphere51aConfig
     public int CombatIdleTimeoutMs { get; set; } = 30000;
     public bool IndependentTimers { get; set; } = false;
     public string WeaponTimingConfigPath { get; set; } = "Data/Sphere51a/weapons_timing.json";
+
+    /// <summary>
+    /// Combat audit system configuration.
+    /// Controls logging, verification, and performance monitoring.
+    /// </summary>
+    public AuditConfig Audit { get; set; } = new AuditConfig();
 }

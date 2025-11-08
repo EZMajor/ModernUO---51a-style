@@ -2,15 +2,15 @@
   <img src="https://user-images.githubusercontent.com/3953314/92417551-a00d7600-f117-11ea-9c28-bb03bbdb1954.png" width=128px />
 </p>
 
-ModernUO [![Discord](https://img.shields.io/discord/751317910504603701?logo=discord&style=social)](https://muo.gg/discord) [![Subreddit subscribers](https://img.shields.io/reddit/subreddit-subscribers/modernuo?style=social&label=/r/modernuo)](https://muo.gg/reddit/) [![Twitter Follow](https://img.shields.io/twitter/follow/modernuo?label=@modernuo&style=social)](https://muo.gg/twitter)
+51a-Style ModernUO [![Discord](https://img.shields.io/discord/751317910504603701?logo=discord&style=social)](https://muo.gg/discord) [![Subreddit subscribers](https://img.shields.io/reddit/subreddit-subscribers/modernuo?style=social&label=/r/modernuo)](https://muo.gg/reddit/) [![Twitter Follow](https://img.shields.io/twitter/follow/modernuo?label=@modernuo&style=social)](https://muo.gg/twitter)
 =====
 
 ##### Ultima Online Server Emulator for the modern era!
-[![GitHub license](https://img.shields.io/github/license/modernuo/ModernUO?color=blue)](https://github.com/modernuo/ModernUO/blob/master/LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/modernuo/ModernUO?logo=github&style=flat)](https://github.com/modernuo/ModernUO/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/modernuo/ModernUO?logo=github)](https://github.com/modernuo/ModernUO/issues)
+[![GitHub license](https://img.shields.io/github/license/EZMajor/51a-style-ModernUo?color=blue)](https://github.com/EZMajor/51a-style-ModernUo/blob/master/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/EZMajor/51a-style-ModernUo?logo=github&style=flat)](https://github.com/EZMajor/51a-style-ModernUo/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/EZMajor/51a-style-ModernUo?logo=github)](https://github.com/EZMajor/51a-style-ModernUo/issues)
 <br/>
-[![GitHub build](https://img.shields.io/github/actions/workflow/status/modernuo/ModernUO/build-test.yml?branch=main&logo=github)](https://github.com/modernuo/ModernUO/actions)
+[![GitHub build](https://img.shields.io/github/actions/workflow/status/EZMajor/51a-style-ModernUo/build-test.yml?branch=Sphere51a-ModernUO&logo=github)](https://github.com/EZMajor/51a-style-ModernUo/actions)
 [![Azure Pipelines build](https://dev.azure.com/modernuo/modernuo/_apis/build/status/Build?branchName=main)](https://dev.azure.com/modernuo/modernuo/_build/latest?definitionId=1&branchName=main)
 
 ## Requirements
@@ -50,9 +50,9 @@ ModernUO [![Discord](https://img.shields.io/discord/751317910504603701?logo=disc
 </p>
 
 ## Getting Started
-- Install prerequisite [requirements](https://github.com/modernuo/ModernUO#requirements)
-- Clone this repository (or download the [latest](https://github.com/modernuo/ModernUO/archive/refs/heads/main.zip)):
-  - `git clone https://github.com/modernuo/ModernUO.git`
+- Install prerequisite [requirements](https://github.com/EZMajor/51a-style-ModernUo#requirements)
+- Clone this repository (or download the [latest](https://github.com/EZMajor/51a-style-ModernUo/archive/refs/heads/Sphere51a-ModernUO.zip)):
+  - `git clone https://github.com/EZMajor/51a-style-ModernUo.git`
 - Open `ModernUO.sln` to start developing
 
 ## Building/Publishing
