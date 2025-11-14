@@ -34,13 +34,13 @@ IF "%~3" == "" (
 echo dotnet tool restore
 dotnet tool restore
 
-echo dotnet clean --verbosity quiet
-dotnet clean --verbosity quiet
-echo dotnet restore --force-evaluate --source https://api.nuget.org/v3/index.json
-dotnet restore --force-evaluate --source https://api.nuget.org/v3/index.json
+echo dotnet clean ModernUO.sln --verbosity quiet
+dotnet clean ModernUO.sln --verbosity quiet
+echo dotnet restore ModernUO.sln --force-evaluate --source https://api.nuget.org/v3/index.json
+dotnet restore ModernUO.sln --force-evaluate --source https://api.nuget.org/v3/index.json
 
-echo dotnet publish %config% %os%-%arch% --no-restore --self-contained=false
-dotnet publish %config% %os%-%arch% --no-restore --self-contained=false
+echo dotnet publish ModernUO.sln %config% %os%-%arch% --no-restore --self-contained=false
+dotnet publish ModernUO.sln %config% %os%-%arch% --no-restore --self-contained=false
 
 echo Generating serialization migration schema...
 dotnet tool run ModernUOSchemaGenerator -- ModernUO.sln

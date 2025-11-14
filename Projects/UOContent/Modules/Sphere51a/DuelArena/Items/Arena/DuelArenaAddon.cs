@@ -20,7 +20,7 @@ public partial class DuelArenaComponent : AddonComponent
 /// Consolidated duel stone component that handles all duel functionality directly.
 /// This is the clickable gravestone (0xED7) that players interact with to start duels.
 /// </summary>
-[SerializationGenerator(0)]
+[SerializationGenerator(1)]
 public partial class DuelStoneComponent : AddonComponent
 {
     [SerializableField(0)]
@@ -43,7 +43,10 @@ public partial class DuelStoneComponent : AddonComponent
     [SerializedCommandProperty(AccessLevel.GameMaster)]
     private int _maxIdleTimeSeconds = 30;
 
+    // Arena is NOT serialized via SerializableField because it's not an ISerializable
+    // Instead, we manually serialize it in the Deserialize method
     private DuelArena _arena;
+
     private DuelContext _activeContext;
 
     [CommandProperty(AccessLevel.GameMaster)]
@@ -71,6 +74,67 @@ public partial class DuelStoneComponent : AddonComponent
         Weight = 0;
 
         _arena = DuelArena.CreateDefault();
+    }
+
+    private void Serialize(IGenericWriter writer, int version)
+    {
+        // Write arena manually (version 1)
+        if (_arena != null)
+        {
+            writer.Write(true); // Arena exists
+            writer.Write(_arena.Name);
+            writer.Write(_arena.SpawnPoints.Length);
+            foreach (var spawn in _arena.SpawnPoints)
+            {
+                writer.Write(spawn);
+            }
+            writer.Write(_arena.Bounds);
+            writer.Write(_arena.Map);
+            writer.Write(_arena.ExitLocation);
+            writer.Write(_arena.MaxPlayers);
+        }
+        else
+        {
+            writer.Write(false); // No arena
+        }
+    }
+
+    private void Deserialize(IGenericReader reader, int version)
+    {
+        switch (version)
+        {
+            case 1:
+                // Read arena manually
+                bool hasArena = reader.ReadBool();
+                if (hasArena)
+                {
+                    string name = reader.ReadString();
+                    int spawnCount = reader.ReadInt();
+                    Point3D[] spawns = new Point3D[spawnCount];
+                    for (int i = 0; i < spawnCount; i++)
+                    {
+                        spawns[i] = reader.ReadPoint3D();
+                    }
+                    Rectangle2D bounds = reader.ReadRect2D();
+                    Map map = reader.ReadMap();
+                    Point3D exitLoc = reader.ReadPoint3D();
+                    int maxPlayers = reader.ReadInt();
+
+                    _arena = new DuelArena(name, spawns, bounds, map, exitLoc, maxPlayers);
+                }
+                else
+                {
+                    _arena = DuelArena.CreateDefault();
+                }
+                break;
+            case 0:
+                // Version 0 didn't have arena serialization
+                _arena = DuelArena.CreateDefault();
+                break;
+        }
+
+        // Ensure arena is created if null after deserialization
+        _arena ??= DuelArena.CreateDefault();
     }
 
     public override void OnSingleClick(Mobile from)
@@ -515,9 +579,16 @@ public partial class DuelStoneComponent : AddonComponent
             return;
         }
 
-        if (from.Backpack != null)
+        // Refund to bank (safe, prevents weight issues, matches UO standards)
+        if (from.BankBox != null)
         {
-            from.Backpack.AddItem(new Gold(amount));
+            from.BankBox.DropItem(new Gold(amount));
+            from.SendMessage($"{amount} gold has been refunded to your bank.");
+        }
+        else if (from.Backpack != null)
+        {
+            // Fallback only if bank is somehow unavailable
+            from.Backpack.DropItem(new Gold(amount));
             from.SendMessage($"{amount} gold has been refunded to your backpack.");
         }
     }
@@ -621,12 +692,21 @@ public partial class DuelStoneComponent : AddonComponent
 [SerializationGenerator(0)]
 public partial class DuelArenaAddon : BaseAddon
 {
+    [SerializableField(0)]
     private List<DuelStoneComponent> _duelStoneComponents = new();
 
     [Constructible]
     public DuelArenaAddon()
     {
         BuildArenaComplex();
+    }
+
+    [AfterDeserialization]
+    private void AfterDeserialization()
+    {
+        // Reconfigure all stones after deserialization to ensure
+        // arena coordinates match the addon's current location
+        ReconfigureAllStones();
     }
 
     private void BuildArenaComplex()

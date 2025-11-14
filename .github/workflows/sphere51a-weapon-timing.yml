@@ -1,0 +1,155 @@
+name: Sphere51a Weapon Timing Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'Projects/UOContent/Modules/Sphere51a/**'
+      - 'Projects/Server/**'
+      - 'Projects/Application/**'
+      - 'run_test.*'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'Projects/UOContent/Modules/Sphere51a/**'
+      - 'Projects/Server/**'
+      - 'Projects/Application/**'
+      - 'run_test.*'
+
+jobs:
+  test:
+    name: Weapon Timing Test
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Build.props') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build project
+      run: dotnet build Projects/Application/Application.csproj --configuration Release --verbosity minimal
+
+    - name: Run Weapon Timing Test
+      run: dotnet run --project Projects/Application/Application.csproj -- --quick-test --scenario weapon_timing --duration 30 --verbose
+      continue-on-error: true
+      id: test
+
+    - name: Upload test logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-logs-${{ github.run_number }}
+        path: |
+          Distribution/AuditReports/Logs/
+          Distribution/AuditReports/Recovery/
+        retention-days: 30
+
+    - name: Upload test reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-reports-${{ github.run_number }}
+        path: |
+          Distribution/AuditReports/Latest_*.md
+          Distribution/AuditReports/2025-*.md
+          Distribution/AuditReports/2025-*.json
+        retention-days: 30
+
+    - name: Check test results
+      if: always()
+      run: |
+        $reportPath = "Distribution/AuditReports/Latest_Weapon Swing Timing TestSummary.md"
+        if (Test-Path $reportPath) {
+          $content = Get-Content $reportPath -Raw
+          if ($content -match "Status:\s*\*\*FAILED\*\*") {
+            Write-Host "Test FAILED - check artifacts for details"
+            exit 1
+          } elseif ($content -match "Status:\s*\*\*PASSED\*\*") {
+            Write-Host "Test PASSED"
+            exit 0
+          } else {
+            Write-Host "Test status unclear - check artifacts"
+            exit 1
+          }
+        } else {
+          Write-Host "No test report found"
+          exit 1
+        }
+
+    - name: Performance regression check
+      if: steps.test.outcome == 'success'
+      run: |
+        # Extract accuracy from latest report
+        $reportPath = "Distribution/AuditReports/Latest_Weapon Swing Timing TestSummary.md"
+        if (Test-Path $reportPath) {
+          $content = Get-Content $reportPath -Raw
+          if ($content -match "Accuracy:\s*(\d+\.?\d*)%") {
+            $accuracy = [double]$matches[1]
+            Write-Host "Test Accuracy: $accuracy%"
+
+            # Check against baseline (95% target)
+            if ($accuracy -lt 95.0) {
+              Write-Host "WARNING: Accuracy below target (95.0%)"
+              # Don't fail CI, just warn
+            }
+
+            # Could add more sophisticated regression detection here
+            # by comparing against previous runs stored as artifacts
+          }
+        }
+
+    - name: Create test summary comment
+      if: always() && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+
+          // Try to read the test report
+          const reportPath = 'Distribution/AuditReports/Latest_Weapon Swing Timing TestSummary.md';
+          let summary = '## Weapon Timing Test Results\n\n';
+
+          if (fs.existsSync(reportPath)) {
+            const content = fs.readFileSync(reportPath, 'utf8');
+
+            // Extract key metrics
+            const statusMatch = content.match(/Status:\s*\*\*(\w+)\*\*/);
+            const accuracyMatch = content.match(/Accuracy:\s*(\d+\.?\d*)%/);
+            const swingsMatch = content.match(/Total Swings:\s*(\d+)/);
+
+            summary += `**Status:** ${statusMatch ? statusMatch[1] : 'Unknown'}\n`;
+            summary += `**Accuracy:** ${accuracyMatch ? accuracyMatch[1] + '%' : 'N/A'}\n`;
+            summary += `**Total Swings:** ${swingsMatch ? swingsMatch[1] : 'N/A'}\n\n`;
+
+            if (statusMatch && statusMatch[1] === 'FAILED') {
+              summary += '❌ Test failed - check the run artifacts for detailed logs and reports.\n';
+            } else if (statusMatch && statusMatch[1] === 'PASSED') {
+              summary += '✅ Test passed successfully!\n';
+            }
+          } else {
+            summary += 'No test report found. Check the run logs for issues.\n';
+          }
+
+          summary += '\n[View Test Artifacts](' + context.payload.repository.html_url + '/actions/runs/' + context.runId + ')';
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: summary
+          });

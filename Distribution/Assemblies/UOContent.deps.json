@@ -1,0 +1,354 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0/win-x64",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {},
+    ".NETCoreApp,Version=v9.0/win-x64": {
+      "UOContent/0.15.1": {
+        "dependencies": {
+          "Argon2.Bindings": "1.16.1",
+          "CommunityToolkit.HighPerformance": "8.4.0",
+          "LibDeflate.Bindings": "1.0.2.120",
+          "Logger": "1.0.0",
+          "MailKit": "4.13.0",
+          "Microsoft.Extensions.FileSystemGlobbing": "9.0.7",
+          "ModernUO.CodeGeneratedEvents.Annotations": "1.0.0",
+          "ModernUO.CodeGeneratedEvents.Generator": "1.0.3.2",
+          "ModernUO.Serialization.Annotations": "2.9.1",
+          "ModernUO.Serialization.Generator": "2.12.20",
+          "Nerdbank.GitVersioning": "3.7.115",
+          "Serilog": "4.3.0",
+          "Serilog.Sinks.Async": "2.1.0",
+          "Serilog.Sinks.Console": "6.0.0",
+          "Server": "0.0.0",
+          "Zstd.Binaries": "1.6.0"
+        },
+        "runtime": {
+          "UOContent.dll": {}
+        }
+      },
+      "Argon2.Bindings/1.16.1": {
+        "runtime": {
+          "lib/net7.0/Argon2.Bindings.dll": {
+            "assemblyVersion": "1.16.1.0",
+            "fileVersion": "1.16.1.0"
+          }
+        },
+        "native": {
+          "runtimes/win-x64/native/libargon2.dll": {
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "BouncyCastle.Cryptography/2.5.1": {
+        "runtime": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.5.1.28965"
+          }
+        }
+      },
+      "CommunityToolkit.HighPerformance/8.4.0": {
+        "runtime": {
+          "lib/net8.0/CommunityToolkit.HighPerformance.dll": {
+            "assemblyVersion": "8.4.0.0",
+            "fileVersion": "8.4.0.1"
+          }
+        }
+      },
+      "LibDeflate.Bindings/1.0.2.120": {
+        "runtime": {
+          "lib/net8.0/LibDeflate.Bindings.dll": {
+            "assemblyVersion": "1.0.2.120",
+            "fileVersion": "1.0.2.120"
+          }
+        },
+        "native": {
+          "runtimes/win-x64/native/libdeflate.dll": {
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "MailKit/4.13.0": {
+        "dependencies": {
+          "MimeKit": "4.13.0",
+          "System.Formats.Asn1": "8.0.1"
+        },
+        "runtime": {
+          "lib/net8.0/MailKit.dll": {
+            "assemblyVersion": "4.13.0.0",
+            "fileVersion": "4.13.0.0"
+          }
+        }
+      },
+      "Microsoft.Extensions.FileSystemGlobbing/9.0.7": {
+        "runtime": {
+          "lib/net9.0/Microsoft.Extensions.FileSystemGlobbing.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.725.31616"
+          }
+        }
+      },
+      "MimeKit/4.13.0": {
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.5.1",
+          "System.Security.Cryptography.Pkcs": "8.0.1"
+        },
+        "runtime": {
+          "lib/net8.0/MimeKit.dll": {
+            "assemblyVersion": "4.13.0.0",
+            "fileVersion": "4.13.0.0"
+          }
+        }
+      },
+      "ModernUO.CodeGeneratedEvents.Annotations/1.0.0": {
+        "runtime": {
+          "lib/netstandard2.0/ModernUO.CodeGeneratedEvents.Annotations.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "ModernUO.CodeGeneratedEvents.Generator/1.0.3.2": {
+        "runtime": {
+          "lib/netstandard2.0/ModernUO.CodeGeneratedEvents.Generator.dll": {
+            "assemblyVersion": "1.0.3.2",
+            "fileVersion": "1.0.3.2"
+          }
+        }
+      },
+      "ModernUO.Serialization.Annotations/2.9.1": {
+        "runtime": {
+          "lib/netstandard2.0/ModernUO.Serialization.Annotations.dll": {
+            "assemblyVersion": "2.9.1.0",
+            "fileVersion": "2.9.1.0"
+          }
+        }
+      },
+      "ModernUO.Serialization.Generator/2.12.20": {},
+      "Nerdbank.GitVersioning/3.7.115": {},
+      "PollGroup/1.6.1": {},
+      "Serilog/4.3.0": {
+        "runtime": {
+          "lib/net9.0/Serilog.dll": {
+            "assemblyVersion": "4.3.0.0",
+            "fileVersion": "4.3.0.0"
+          }
+        }
+      },
+      "Serilog.Sinks.Async/2.1.0": {
+        "dependencies": {
+          "Serilog": "4.3.0"
+        },
+        "runtime": {
+          "lib/net8.0/Serilog.Sinks.Async.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
+          }
+        }
+      },
+      "Serilog.Sinks.Console/6.0.0": {
+        "dependencies": {
+          "Serilog": "4.3.0"
+        },
+        "runtime": {
+          "lib/net8.0/Serilog.Sinks.Console.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.0.0"
+          }
+        }
+      },
+      "System.Formats.Asn1/8.0.1": {},
+      "System.IO.Hashing/9.0.7": {},
+      "System.Security.Cryptography.Pkcs/8.0.1": {
+        "runtime": {
+          "runtimes/win/lib/net8.0/System.Security.Cryptography.Pkcs.dll": {
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.1024.46610"
+          }
+        }
+      },
+      "Zstd.Binaries/1.6.0": {
+        "runtime": {
+          "lib/net7.0/Zstd.Binaries.dll": {
+            "assemblyVersion": "1.6.0.0",
+            "fileVersion": "1.6.0.0"
+          }
+        },
+        "native": {
+          "runtimes/win-x64/native/zstd.exe": {
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Logger/1.0.0": {
+        "dependencies": {
+          "Serilog": "4.3.0",
+          "Serilog.Sinks.Async": "2.1.0",
+          "Serilog.Sinks.Console": "6.0.0"
+        },
+        "runtime": {
+          "Logger.dll": {
+            "assemblyVersion": "0.15.0.0",
+            "fileVersion": "0.15.1.7"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "UOContent/0.15.1": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Argon2.Bindings/1.16.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-f2+qOv1N2is/J2T5+fmMn57CXMVnuJJaJpgchoJlTHUdkKpnbp/YpjdjzdkI6sa3LSwUQN8ME07LgthfhyQ9vA==",
+      "path": "argon2.bindings/1.16.1",
+      "hashPath": "argon2.bindings.1.16.1.nupkg.sha512"
+    },
+    "BouncyCastle.Cryptography/2.5.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-zy8TMeTP+1FH2NrLaNZtdRbBdq7u5MI+NFZQOBSM69u5RFkciinwzV2eveY6Kjf5MzgsYvvl6kTStsj3JrXqkg==",
+      "path": "bouncycastle.cryptography/2.5.1",
+      "hashPath": "bouncycastle.cryptography.2.5.1.nupkg.sha512"
+    },
+    "CommunityToolkit.HighPerformance/8.4.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-flxspiBs0G/0GMp7IK2J2ijV9bTG6hEwFc/z6ekHqB6nwRJ4Ry2yLdx+TkbCUYFCl4XhABkAwomeKbT6zM2Zlg==",
+      "path": "communitytoolkit.highperformance/8.4.0",
+      "hashPath": "communitytoolkit.highperformance.8.4.0.nupkg.sha512"
+    },
+    "LibDeflate.Bindings/1.0.2.120": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-LnVFG0InUjkN9qhaLs/vdqYLvNfWZ3iEgOc0l1y0Wr/yFl58i3GErOO9DW0bLHw1jihJIZXWSYX6M6uv30mi8Q==",
+      "path": "libdeflate.bindings/1.0.2.120",
+      "hashPath": "libdeflate.bindings.1.0.2.120.nupkg.sha512"
+    },
+    "MailKit/4.13.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-GsepEHKkaQvbAuBizlhz93yc0ihJWzVCfoerfnpCeqiKLeS6gsTKInYy3/U2wqgkGE62TKs5OKS1a90pyc+j4g==",
+      "path": "mailkit/4.13.0",
+      "hashPath": "mailkit.4.13.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.FileSystemGlobbing/9.0.7": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-5VKpTH2ME0SSs0lrtkpKgjCeHzXR5ka/H+qThPwuWi78wHubApZ/atD7w69FDt0OOM7UMV6LIbkqEQgoby4IXA==",
+      "path": "microsoft.extensions.filesystemglobbing/9.0.7",
+      "hashPath": "microsoft.extensions.filesystemglobbing.9.0.7.nupkg.sha512"
+    },
+    "MimeKit/4.13.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-oa4JuhAzJydHnPCc/XWeyBUGd3uiVyWW0NXqOVgkXEHjbHlPVBssklK3mpw9sokjzAaBGdj0bceFsr+NXvAukA==",
+      "path": "mimekit/4.13.0",
+      "hashPath": "mimekit.4.13.0.nupkg.sha512"
+    },
+    "ModernUO.CodeGeneratedEvents.Annotations/1.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-5ubZ6KteYbSOUDR8SVlnaZLLWAAOwW+1cxg4oIZKWBB4D+tgUkFV4aZS7Loh+FJuCZPqw6/2RvG50srrXKxp0A==",
+      "path": "modernuo.codegeneratedevents.annotations/1.0.0",
+      "hashPath": "modernuo.codegeneratedevents.annotations.1.0.0.nupkg.sha512"
+    },
+    "ModernUO.CodeGeneratedEvents.Generator/1.0.3.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+3TjwpLdfJUkxnxYKX54b0hqq1hYf/HSU9JB7eDGRdj6E+I9kSk0OhfIws/0i9EbkxDJc34AOOK9aWJon7/4dg==",
+      "path": "modernuo.codegeneratedevents.generator/1.0.3.2",
+      "hashPath": "modernuo.codegeneratedevents.generator.1.0.3.2.nupkg.sha512"
+    },
+    "ModernUO.Serialization.Annotations/2.9.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-WryDYdfakzZgfu0I4cibNTXHcZxeEXB4+PyeudyWhyd8wVc5cOmFyhhobS1/PHPK8YnxbntnaRTAQokG3pauNg==",
+      "path": "modernuo.serialization.annotations/2.9.1",
+      "hashPath": "modernuo.serialization.annotations.2.9.1.nupkg.sha512"
+    },
+    "ModernUO.Serialization.Generator/2.12.20": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-H8Sfk+dpLBXG1RRAfnMypev5BgIRPQ/YMIOtw+MkMGi8lPwCrDiYgSlLm0IReOZKESjc4ABSk5tPhdflBaSaXA==",
+      "path": "modernuo.serialization.generator/2.12.20",
+      "hashPath": "modernuo.serialization.generator.2.12.20.nupkg.sha512"
+    },
+    "Nerdbank.GitVersioning/3.7.115": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-EpXamaAdRfG/BMxGgvZlTM0npRnkmXUjAj8OdNKd17t4oN+2nvjdv/KnFmzOOMDqvlwB49UCwtOHJrAQTfUBtQ==",
+      "path": "nerdbank.gitversioning/3.7.115",
+      "hashPath": "nerdbank.gitversioning.3.7.115.nupkg.sha512"
+    },
+    "PollGroup/1.6.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-2NtGuj45RnoM3CYgvVGdftGROvBHrCzKGPJfc+rSBBBG+9Do/kl8tH7GeUlmvPs2ulRF8tYKhAzuF7c9OMD1Uw==",
+      "path": "pollgroup/1.6.1",
+      "hashPath": "pollgroup.1.6.1.nupkg.sha512"
+    },
+    "Serilog/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+cDryFR0GRhsGOnZSKwaDzRRl4MupvJ42FhCE4zhQRVanX0Jpg6WuCBk59OVhVDPmab1bB+nRykAnykYELA9qQ==",
+      "path": "serilog/4.3.0",
+      "hashPath": "serilog.4.3.0.nupkg.sha512"
+    },
+    "Serilog.Sinks.Async/2.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-SnmRknWsSMgyo9wDXeZZCqSp48kkQYy44taSM6vcpxfiRICzSf09oLKEmVr0RCwQnfd8mJQ2WNN6nvhqf0RowQ==",
+      "path": "serilog.sinks.async/2.1.0",
+      "hashPath": "serilog.sinks.async.2.1.0.nupkg.sha512"
+    },
+    "Serilog.Sinks.Console/6.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-fQGWqVMClCP2yEyTXPIinSr5c+CBGUvBybPxjAGcf7ctDhadFhrQw03Mv8rJ07/wR5PDfFjewf2LimvXCDzpbA==",
+      "path": "serilog.sinks.console/6.0.0",
+      "hashPath": "serilog.sinks.console.6.0.0.nupkg.sha512"
+    },
+    "System.Formats.Asn1/8.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-XqKba7Mm/koKSjKMfW82olQdmfbI5yqeoLV/tidRp7fbh5rmHAQ5raDI/7SU0swTzv+jgqtUGkzmFxuUg0it1A==",
+      "path": "system.formats.asn1/8.0.1",
+      "hashPath": "system.formats.asn1.8.0.1.nupkg.sha512"
+    },
+    "System.IO.Hashing/9.0.7": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-2sMrwd/AHYipeiOwYcoqD99c4U8F2x7GalonEYxkHUvTLNzE9Pxx2lz8ygS9cOqyDsruYARZAYL5pPVFh/s3lw==",
+      "path": "system.io.hashing/9.0.7",
+      "hashPath": "system.io.hashing.9.0.7.nupkg.sha512"
+    },
+    "System.Security.Cryptography.Pkcs/8.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-CoCRHFym33aUSf/NtWSVSZa99dkd0Hm7OCZUxORBjRB16LNhIEOf8THPqzIYlvKM0nNDAPTRBa1FxEECrgaxxA==",
+      "path": "system.security.cryptography.pkcs/8.0.1",
+      "hashPath": "system.security.cryptography.pkcs.8.0.1.nupkg.sha512"
+    },
+    "Zstd.Binaries/1.6.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Pvlf2xNqWucr4FuUbz1Ak3r5uJfGuxYwMKMY8jrtl10vdc7p21dS9WzJsE1iYScnu7hV/qRpFjpPtE1MKXRgTw==",
+      "path": "zstd.binaries/1.6.0",
+      "hashPath": "zstd.binaries.1.6.0.nupkg.sha512"
+    },
+    "Logger/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

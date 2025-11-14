@@ -76,6 +76,11 @@ public static class TcpServer
 
     public static void Shutdown()
     {
+        if (Listeners == null)
+        {
+            return;
+        }
+
         foreach (var listener in Listeners)
         {
             listener.Close();

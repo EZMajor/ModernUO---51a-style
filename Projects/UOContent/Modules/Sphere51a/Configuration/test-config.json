@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Sphere51a Combat & Magic Testing Configuration with Baseline Tracking",
+
+  "testSettings": {
+    "defaultDurationSeconds": 60,
+    "warmupSeconds": 5,
+    "enableDetailedLogging": false,
+    "exitOnFailure": true
+  },
+
+  "baselines": {
+    "weapon_swing_timing": {
+      "description": "Weapon swing timing accuracy baseline",
+      "accuracy_percent": 98.5,
+      "target_precision_ms": 25,
+      "max_variance_ms": 50,
+      "max_outliers_percent": 2.0,
+      "last_updated": "2025-01-15",
+      "last_build": "v0.1.0"
+    },
+
+    "spell_timing": {
+      "description": "Spell cast timing accuracy baseline",
+      "accuracy_percent": 97.0,
+      "target_precision_ms": 50,
+      "max_variance_ms": 100,
+      "max_double_casts": 0,
+      "max_fizzle_rate_percent": 5.0,
+      "last_updated": "2025-01-15",
+      "last_build": "v0.1.0"
+    },
+
+    "stress_test": {
+      "description": "System performance under load baseline",
+      "max_tick_time_ms": 10.0,
+      "max_throttle_events": 0,
+      "min_throughput_actions_per_sec": 100,
+      "max_memory_mb": 500,
+      "last_updated": "2025-01-15",
+      "last_build": "v0.1.0"
+    }
+  },
+
+  "scenarios": {
+    "weapon_timing": {
+      "enabled": true,
+      "duration_seconds": 60,
+      "weapons": [
+        { "type": "Katana", "speed": 1300, "test_dex_values": [25, 50, 75, 100, 150] },
+        { "type": "Longsword", "speed": 1400, "test_dex_values": [25, 50, 75, 100, 150] },
+        { "type": "Broadsword", "speed": 1450, "test_dex_values": [25, 50, 75, 100, 150] },
+        { "type": "WarAxe", "speed": 1500, "test_dex_values": [25, 50, 75, 100, 150] },
+        { "type": "Dagger", "speed": 1100, "test_dex_values": [25, 50, 75, 100, 150] }
+      ],
+      "min_swings_per_weapon": 20
+    },
+
+    "spell_timing": {
+      "enabled": true,
+      "implementation_status": "IMPLEMENTED",
+      "requires_integration": true,
+      "notes": [
+        "Spell integration is COMPLETE - Phase 3 finished.",
+        "Spell.cs has Sphere51a event hooks integrated.",
+        "Tests should now PASS with spell timing validation.",
+        "Events: OnSpellCastBegin, OnSpellCastComplete are raised.",
+        "Timing: GetCastDelay() uses SpellTimingProvider."
+      ],
+      "duration_seconds": 60,
+      "spells": [
+        { "name": "MagicArrow", "circle": 1, "min_casts": 30 },
+        { "name": "Fireball", "circle": 3, "min_casts": 20 },
+        { "name": "Lightning", "circle": 4, "min_casts": 15 },
+        { "name": "EnergyBolt", "circle": 6, "min_casts": 10 },
+        { "name": "Flamestrike", "circle": 6, "min_casts": 10 }
+      ],
+      "test_int_values": [25, 50, 75, 100],
+      "test_double_cast_detection": true,
+      "min_cast_interval_ms": 400
+    },
+
+    "stress_test": {
+      "enabled": true,
+      "duration_seconds": 120,
+      "concurrent_combatants": 20,
+      "weapon_mix": ["Katana", "Longsword", "Broadsword"],
+      "spell_mix": ["MagicArrow", "Fireball", "Lightning"],
+      "measure_tick_performance": true
+    }
+  },
+
+  "reportSettings": {
+    "output_directory": "AuditReports",
+    "archive_directory": "AuditReports/Archive",
+    "retention_days_local": 7,
+    "retention_days_ci": 30,
+    "generate_latest_summary": true,
+    "include_detailed_entries": false,
+    "export_raw_jsonl": true
+  },
+
+  "thresholds": {
+    "warning_variance_ms": 25,
+    "error_variance_ms": 50,
+    "critical_variance_ms": 100,
+    "max_acceptable_outliers": 5
+  }
+}

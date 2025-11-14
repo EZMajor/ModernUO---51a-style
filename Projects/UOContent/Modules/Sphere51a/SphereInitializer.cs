@@ -70,6 +70,9 @@ public static class SphereInitializer
             // Initialize combat systems
             InitializeCombatSystem();
 
+            // Initialize spell timing provider
+            InitializeSpellSystems();
+
             // Register event handlers
             RegisterEventHandlers();
 
@@ -171,16 +174,43 @@ public static class SphereInitializer
     }
 
     /// <summary>
+    /// Initializes spell-related systems.
+    /// </summary>
+    private static void InitializeSpellSystems()
+    {
+        logger.Information("Initializing spell systems");
+
+        // Initialize spell timing provider
+        var spellTimingProviderType = Type.GetType("Server.Modules.Sphere51a.Spells.SpellTimingProvider, Server");
+        if (spellTimingProviderType != null)
+        {
+            var initializeMethod = spellTimingProviderType.GetMethod("Initialize", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            initializeMethod?.Invoke(null, null);
+        }
+        else
+        {
+            logger.Warning("Could not find SpellTimingProvider type for initialization");
+        }
+
+        logger.Information("Spell systems initialized");
+    }
+
+    /// <summary>
     /// Registers event handlers for combat events.
     /// </summary>
     private static void RegisterEventHandlers()
     {
-        // Register weapon swing event handler
+        // Register weapon swing event handlers
         SphereEvents.OnWeaponSwing += HandleWeaponSwingEvent;
-
-        // Register weapon swing complete event handler
         SphereEvents.OnWeaponSwingComplete += HandleWeaponSwingCompleteEvent;
 
+        // Register spell event handlers
+        SphereEvents.OnSpellCastBegin += Server.Modules.Sphere51a.Spells.SphereSpellHandlers.HandleSpellCastBegin;
+        SphereEvents.OnSpellCast += Server.Modules.Sphere51a.Spells.SphereSpellHandlers.HandleSpellCast;
+        SphereEvents.OnSpellCastComplete += Server.Modules.Sphere51a.Spells.SphereSpellHandlers.HandleSpellCastComplete;
+        SphereEvents.OnSpellBlocksMovement += Server.Modules.Sphere51a.Spells.SphereSpellHandlers.HandleSpellBlocksMovement;
+
+        logger.Information("[Sphere51a] Spell event handlers registered: SphereSpellHandlers (unified system)");
         logger.Debug("Event handlers registered");
     }
 

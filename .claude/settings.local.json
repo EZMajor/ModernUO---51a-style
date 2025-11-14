@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build:*)",
+      "Bash(dotnet:*)",
+      "Bash(if [ -f \"Projects/UOContent/Modules/Sphere51a/Configuration/config.json\" ])",
+      "Bash(then cat \"Projects/UOContent/Modules/Sphere51a/Configuration/config.json\")",
+      "Bash(else echo \"File does not exist\")",
+      "Bash(fi)",
+      "Bash(tee:*)",
+      "Bash(python -m json.tool:*)",
+      "Bash(/dev/null)",
+      "Bash(timeout 120 dotnet:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(timeout 60 dotnet:*)",
+      "Bash(dir:*)",
+      "Bash(nul)",
+      "Bash(findstr:*)",
+      "Bash(cat:*)",
+      "Bash(if [ -f \"Projects/Application/TestConfigurationManager.cs\" ])",
+      "Bash(then echo \"TestConfigurationManager.cs exists\")",
+      "Bash(del \"Distribution\\Configuration\\modernuo.json\" 2)",
+      "Bash(del \"Distribution\\Configuration\\expansion.json\" 2)",
+      "Bash(if [ -f \"Distribution/Data/Sphere51a/spell_timing.json\" ])",
+      "Bash(then echo \"Found: Distribution/Data/Sphere51a/spell_timing.json\")",
+      "Bash(elif [ -f \"Configuration/spell_timing.json\" ])",
+      "Bash(then echo \"Found: Configuration/spell_timing.json\")",
+      "Bash(else echo \"Not found in either location\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

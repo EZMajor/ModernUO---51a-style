@@ -2,6 +2,8 @@ using System;
 using ModernUO.Serialization;
 using Server.Targeting;
 using CalcMoves = Server.Movement.Movement;
+using Server.Modules.Sphere51a.Configuration;
+using Server.Modules.Sphere51a.Extensions;
 
 namespace Server.Items;
 
@@ -18,6 +20,11 @@ public partial class ThrowingDagger : Item
 
     public override void OnDoubleClick(Mobile from)
     {
+        if (SphereConfiguration.Enabled && !(Parent == from && from.FindItemOnLayer(Layer) == this))
+        {
+            EquipmentHelper.TryEquipItem(from, this);
+        }
+
         if (from.Items.Contains(this))
         {
             var t = new InternalTarget(this);

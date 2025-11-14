@@ -60,6 +60,13 @@ public partial class DuelArena
     [SerializableFieldDefault(5)]
     private int MaxPlayersDefaultValue() => 2;
 
+    [AfterDeserialization]
+    private void AfterDeserialization()
+    {
+        // Recreate the region after deserialization
+        CreateRegion();
+    }
+
     public static DuelArena CreateDefault() => new(
         "Classic Arena",
         [new Point3D(5450, 1162, 0), new Point3D(5460, 1162, 0)],

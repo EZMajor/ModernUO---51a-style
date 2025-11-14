@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <RootNamespace>TestRunner</RootNamespace>
+        <AssemblyName>TestRunner</AssemblyName>
+        <Product>Sphere51a Test Runner</Product>
+        <OutDir>..\..\Distribution</OutDir>
+        <PublishDir>..\..\Distribution</PublishDir>
+        <Configurations>Debug;Release;Analyze</Configurations>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Server\Server.csproj" />
+        <ProjectReference Include="..\Logger\Logger.csproj" />
+        <ProjectReference Include="..\UOContent\UOContent.csproj" />
+    </ItemGroup>
+</Project>

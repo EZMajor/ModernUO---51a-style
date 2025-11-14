@@ -37,7 +37,11 @@ namespace Server.Items
 
         public static void Initialize()
         {
-            Mobile.DefaultWeapon = new Fists();
+            // Skip creating default weapon in headless/test mode
+            if (!Core.HeadlessMode)
+            {
+                Mobile.DefaultWeapon = new Fists();
+            }
         }
 
         public override double GetDefendSkillValue(Mobile attacker, Mobile defender)

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>TestInfrastructure</RootNamespace>
+    <AssemblyName>TestInfrastructure</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="Projects\Logger\Logger.csproj" />
+    <ProjectReference Include="Projects\Server\Server.csproj" />
+    <ProjectReference Include="Projects\UOContent\UOContent.csproj" />
+  </ItemGroup>
+
+</Project>

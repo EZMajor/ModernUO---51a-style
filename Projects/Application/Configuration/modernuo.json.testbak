@@ -1,0 +1,20 @@
+{
+  "assemblyDirectories": [
+    "./Assemblies"
+  ],
+  "dataDirectories": [
+    "E:\\Ultima Code\\Electronic Arts\\Ultima Online Classic"
+  ],
+  "listeners": [
+    "0.0.0.0:2593"
+  ],
+  "settings": {
+    "accountHandler.enableAutoAccountCreation": "True",
+    "expansion": "EJ",
+    "sphere51a.enabled": "true",
+    "core.enableIdleCPU": "False",
+    "pingServer.enabled": "False",
+    "crashGuard.enabled": "True",
+    "autosave.enabled": "False"
+  }
+}

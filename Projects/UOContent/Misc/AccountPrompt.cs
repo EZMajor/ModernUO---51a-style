@@ -11,6 +11,13 @@ public static class AccountPrompt
     {
         if (Accounts.Count == 0)
         {
+            // Skip account creation in headless/test mode
+            if (Core.HeadlessMode)
+            {
+                logger.Information("Headless mode: Skipping account creation");
+                return;
+            }
+
             logger.Warning("This server has no accounts.");
             logger.Information("Do you want to create the owner account now? (y/n):");
 

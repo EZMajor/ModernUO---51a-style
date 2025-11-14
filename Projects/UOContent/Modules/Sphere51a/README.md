@@ -27,13 +27,71 @@ The Sphere51a module provides server-authoritative combat timing with independen
 
 ## Current Status
 
-**Production Ready**
+### Weapon Combat System: Production Ready ✓
 
 - Build Status: **0 errors, 0 warnings**
 - Performance: **<1ms average tick time** (typical load)
 - Optimization: **~15% CPU reduction** from baseline
 - Testing: **Load tested** up to 500 simulated combatants
 - Integration: **CoreHooks mode** (delegate pattern, zero overhead)
+- Features: 25ms precision timing, independent timers, comprehensive audit logging
+
+### Spell System: Not Yet Implemented ✗
+
+**IMPORTANT**: The spell system infrastructure exists but is **not yet connected** to the core spell code.
+
+**Current State**:
+- Event system defined but not raised by spell casting
+- Configuration settings exist but are ignored
+- Spells use standard ModernUO timing (NOT Sphere51a)
+- Spell tests are disabled in `test-config.json`
+
+**Impact**:
+- Weapon combat works with Sphere51a timing ✓
+- Spell combat uses ModernUO timing (different behavior)
+- This is clearly documented and testable
+
+**Roadmap**: Spell integration is planned for Phase 3. See [ADMIN_GUIDE.md](ADMIN_GUIDE.md#known-limitations) for details.
+
+**For Production**: You can safely use Sphere51a for weapon combat while spells remain on ModernUO timing. This is a supported configuration.
+
+---
+
+## Equipment System
+
+### Double-Click to Equip
+
+When Sphere51a is enabled, all equipment can be equipped by double-clicking, matching authentic UO gameplay:
+
+**Supported Equipment Types**:
+- Armor (helmets, chest, legs, arms, gloves, shields)
+- Weapons (one-handed, two-handed)
+- Clothing (robes, shirts, pants, shoes, etc.)
+- Jewelry (rings, bracelets, necklaces, earrings)
+
+**How It Works**:
+- Double-click equipment from your backpack
+- Double-click equipment on the ground (within 2 tiles)
+- Double-click equipment in any accessible container
+- Conflicting items are automatically unequipped to your backpack
+- If overweight, unequipped items drop to your feet
+
+**Automatic Item Management**:
+- **Layer Conflicts**: Equipping a new helmet automatically unequips your current helmet
+- **Two-Handed Weapons**: Automatically unequips both shield and one-handed weapon
+- **One-Handed Weapons**: Automatically unequips two-handed weapon if present
+- **Shields**: Can be equipped alongside one-handed weapons
+- **Overweight Handling**: Items that don't fit in backpack drop to ground with message
+
+**Equipment Requirements**:
+- All standard requirements still apply (strength, dexterity, race, etc.)
+- Cursed items equip normally but follow standard cursed item rules
+- Distance check: 2 tiles for ground items and containers
+
+**What Double-Clicking Does NOT Do**:
+- Double-clicking already-equipped items does nothing (use drag-and-drop to unequip)
+- Items in locked or inaccessible containers cannot be equipped
+- Items beyond 2 tiles range cannot be equipped
 
 ---
 

@@ -1,0 +1,14 @@
+{
+  "version": 0,
+  "type": "Server.Modules.Sphere51a.DuelArena.SphereDuelStoneComponent",
+  "properties": [
+    {
+      "name": "UseSphereMechanics",
+      "type": "bool",
+      "rule": "PrimitiveTypeMigrationRule",
+      "ruleArguments": [
+        ""
+      ]
+    }
+  ]
+}

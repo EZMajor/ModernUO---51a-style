@@ -48,6 +48,7 @@ public class WeaponTimingProvider : ITimingProvider
 
     public WeaponTimingProvider()
     {
+        _weaponTable = new Dictionary<int, WeaponEntry>();
         _loadedWeapons = new Dictionary<string, WeaponEntry>();
     }
 

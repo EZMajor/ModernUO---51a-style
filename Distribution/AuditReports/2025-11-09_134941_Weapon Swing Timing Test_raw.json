@@ -1,0 +1,44 @@
+{
+  "TestType": "Weapon Swing Timing Test",
+  "StartTime": "2025-11-09T13:49:41.6183842Z",
+  "EndTime": "2025-11-09T13:49:46.664033Z",
+  "Duration": "00:00:05.0456488",
+  "BuildVersion": "v0.15.0",
+  "ExecutionMode": "Headless",
+  "Passed": false,
+  "FailureReasons": [
+    "No timing measurements were collected"
+  ],
+  "Summary": {
+    "TotalActions": 0,
+    "AverageVarianceMs": 0,
+    "MaxVarianceMs": 0,
+    "MinVarianceMs": 0,
+    "WithinTargetCount": 0,
+    "AccuracyPercent": 0,
+    "OutlierCount": 0,
+    "OutlierPercent": 0,
+    "DoubleCastCount": 0,
+    "FizzleCount": 0,
+    "FizzleRatePercent": 0,
+    "AvgTickTimeMs": 0,
+    "MaxTickTimeMs": 0,
+    "ThrottleEventCount": 0,
+    "ActionsPerSecond": 0
+  },
+  "WeaponResults": [],
+  "SpellResults": [],
+  "StressResult": null,
+  "Environment": {
+    "Platform": "Win32NT",
+    "OSVersion": "Microsoft Windows NT 10.0.26100.0",
+    "ProcessorCount": 16,
+    "DotNetVersion": "9.0.10",
+    "ServerVersion": "v0.15.0",
+    "AuditSystemEnabled": true,
+    "AuditLevel": "Standard",
+    "ShadowModeEnabled": false
+  },
+  "BaselineComparison": null,
+  "Observations": []
+}

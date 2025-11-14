@@ -1,0 +1,164 @@
+name: Sphere51a Combat & Magic Testing
+
+on:
+  push:
+    branches: [ main, Sphere51a-ModernUO ]
+  pull_request:
+    branches: [ main, Sphere51a-ModernUO ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Sphere51a Tests
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build ModernUO
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Create AuditReports directory
+        run: |
+          New-Item -ItemType Directory -Force -Path "AuditReports"
+          New-Item -ItemType Directory -Force -Path "AuditReports/Archive"
+
+      - name: Run Weapon Timing Test
+        id: weapon_test
+        continue-on-error: true
+        run: |
+          $exitCode = 0
+          try {
+            dotnet run --project Projects/Application/Application.csproj --configuration Release -- --test-mode --scenario weapon_timing --duration 60 --verbose
+            $exitCode = $LASTEXITCODE
+          } catch {
+            Write-Host "Error running weapon timing test: $_"
+            $exitCode = 2
+          }
+          echo "exit_code=$exitCode" >> $env:GITHUB_OUTPUT
+          exit $exitCode
+
+      - name: Run Spell Timing Test
+        id: spell_test
+        continue-on-error: true
+        run: |
+          $exitCode = 0
+          try {
+            dotnet run --project Projects/Application/Application.csproj --configuration Release -- --test-mode --scenario spell_timing --duration 60 --verbose
+            $exitCode = $LASTEXITCODE
+          } catch {
+            Write-Host "Error running spell timing test: $_"
+            $exitCode = 2
+          }
+          echo "exit_code=$exitCode" >> $env:GITHUB_OUTPUT
+          exit $exitCode
+
+      - name: Run Stress Test
+        id: stress_test
+        continue-on-error: true
+        run: |
+          $exitCode = 0
+          try {
+            dotnet run --project Projects/Application/Application.csproj --configuration Release -- --test-mode --scenario stress_test --duration 90 --verbose
+            $exitCode = $LASTEXITCODE
+          } catch {
+            Write-Host "Error running stress test: $_"
+            $exitCode = 2
+          }
+          echo "exit_code=$exitCode" >> $env:GITHUB_OUTPUT
+          exit $exitCode
+
+      - name: Archive Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sphere-test-reports-${{ github.run_number }}
+          path: |
+            AuditReports/*.md
+            AuditReports/*.json
+          retention-days: 30
+
+      - name: Upload Test Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sphere-test-logs-${{ github.run_number }}
+          path: |
+            Logs/CombatAudit/**/*
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Check Test Results
+        run: |
+          $weaponExit = "${{ steps.weapon_test.outputs.exit_code }}"
+          $spellExit = "${{ steps.spell_test.outputs.exit_code }}"
+          $stressExit = "${{ steps.stress_test.outputs.exit_code }}"
+
+          Write-Host "Test Results:"
+          Write-Host "  Weapon Timing: $(if ($weaponExit -eq '0') { '✅ PASSED' } else { '❌ FAILED' })"
+          Write-Host "  Spell Timing:  $(if ($spellExit -eq '0') { '✅ PASSED' } else { '❌ FAILED' })"
+          Write-Host "  Stress Test:   $(if ($stressExit -eq '0') { '✅ PASSED' } else { '❌ FAILED' })"
+
+          if ($weaponExit -ne "0" -or $spellExit -ne "0" -or $stressExit -ne "0") {
+            Write-Host "❌ One or more tests failed"
+            exit 1
+          }
+
+          Write-Host "✅ All tests passed"
+          exit 0
+
+      - name: Post Test Summary
+        if: always()
+        run: |
+          if (Test-Path "AuditReports/Latest_*Summary.md") {
+            $summaries = Get-ChildItem "AuditReports/Latest_*Summary.md"
+
+            foreach ($summary in $summaries) {
+              Write-Host "═══════════════════════════════════════"
+              Write-Host "Report: $($summary.Name)"
+              Write-Host "═══════════════════════════════════════"
+              Get-Content $summary.FullName | Write-Host
+              Write-Host ""
+            }
+          } else {
+            Write-Host "⚠️ No test summary reports found"
+          }
+
+      - name: Comment PR with Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            let comment = '## 🧩 Sphere51a Test Results\n\n';
+
+            const summaryFiles = fs.readdirSync('AuditReports')
+              .filter(f => f.startsWith('Latest_') && f.endsWith('Summary.md'));
+
+            if (summaryFiles.length > 0) {
+              for (const file of summaryFiles) {
+                const content = fs.readFileSync(path.join('AuditReports', file), 'utf8');
+                comment += content + '\n\n---\n\n';
+              }
+            } else {
+              comment += '⚠️ No test reports generated\n';
+            }
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

@@ -83,3 +83,6 @@ Data/
 Accounts/
 Backups/
 Logs/
+
+# Ignore nul files (Windows device files)
+**/nul

@@ -138,6 +138,10 @@ public class DefAlchemy : CraftSystem
         index = AddCraft(typeof(GreaterHealPotion), 1044533, 1044545, 55.0, 105.0, typeof(Ginseng), 1044356, 7, 1044364);
         AddRes(index, typeof(Bottle), 1044529, 1, 500315);
 
+        // Mana Potion
+        index = AddCraft(typeof(GreaterManaPotion), 1044533, "Greater Mana Potion", 55.0, 105.0, typeof(MandrakeRoot), 1044357, 5, 1044365);
+        AddRes(index, typeof(Bottle), 1044529, 1, 500315);
+
         // Strength Potion
         index = AddCraft(
             typeof(StrengthPotion),

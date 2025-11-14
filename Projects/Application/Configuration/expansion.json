@@ -1,0 +1,11 @@
+{
+  "id": 11,
+  "name": "Endless Journey",
+  "enabledMaps": [
+    "Felucca",
+    "Trammel",
+    "Ilshenar",
+    "Malas",
+    "Tokuno"
+  ]
+}

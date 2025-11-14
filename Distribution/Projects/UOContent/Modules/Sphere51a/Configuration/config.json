@@ -1,0 +1,30 @@
+{
+  "Enabled": true,
+  "UseGlobalPulse": true,
+  "GlobalTickMs": 50,
+  "CombatIdleTimeoutMs": 30000,
+  "IndependentTimers": false,
+  "WeaponTimingConfigPath": "Data/Sphere51a/weapons_timing.json",
+  "Audit": {
+    "enabled": true,
+    "level": 1,
+    "outputDirectory": "Logs/CombatAudit",
+    "bufferSize": 10000,
+    "flushIntervalMs": 5000,
+    "enableShadowMode": false,
+    "retentionDays": 7,
+    "maxFileSizeMB": 100,
+    "maxEntriesPerTick": 250,
+    "autoThrottleThresholdMs": 10,
+    "enableWeaponMetrics": true,
+    "enableMobileHistory": true,
+    "mobileHistorySize": 100,
+    "enableSpellAudit": true,
+    "trackManaValidation": true,
+    "trackReagentUsage": false,
+    "logFizzles": true,
+    "minCastIntervalMs": 0,
+    "detectDoublecast": true,
+    "validateScrollUsage": true
+  }
+}

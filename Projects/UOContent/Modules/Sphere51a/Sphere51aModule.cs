@@ -18,6 +18,7 @@ using Server.Modules.Sphere51a.Core;
 using Server.Modules.Sphere51a.DuelArena;
 using Server.Modules.Sphere51a.Events;
 using Server.Modules.Sphere51a.Items;
+using Server.Modules.Sphere51a.Testing;
 
 namespace Server.Modules.Sphere51a;
 
@@ -95,6 +96,10 @@ public static class Sphere51aModule
             SphereConfiguration.Enabled = config.Enabled;
             logger.Information("[Sphere-Config] Synced config to SphereConfiguration.Enabled = {Enabled}", config.Enabled);
 
+            // Initialize UO path resolver for testing framework
+            UOPathResolver.ResolveUOPath();
+            logger.Debug("UO path resolver initialized");
+
             // Register with module registry
             ModuleRegistry.Register("Sphere51a", new Sphere51aModuleInstance());
 
@@ -104,6 +109,9 @@ public static class Sphere51aModule
 
             // Initialize the new global tick system
             SphereInitializer.Initialize();
+
+            // Initialize spell timing provider
+            Spells.SpellTimingProvider.Initialize();
 
             // Initialize legacy subsystems if needed
             if (!SphereConfiguration.UseGlobalPulse)
@@ -156,10 +164,10 @@ public static class Sphere51aModule
         SphereEvents.OnWeaponSwing += SphereCombatSystem.HandleWeaponSwing;
         SphereEvents.OnWeaponSwingComplete += SphereCombatSystem.HandleWeaponSwingComplete;
 
-        // Spell casting events
-        SphereEvents.OnSpellCast += SphereCombatSystem.HandleSpellCast;
-        SphereEvents.OnSpellCastBegin += SphereCombatSystem.HandleSpellCastBegin;
-        SphereEvents.OnSpellCastComplete += SphereCombatSystem.HandleSpellCastComplete;
+        // Spell casting events - DISABLED: Conflicts with SphereSpellHandlers in global pulse mode
+        // SphereEvents.OnSpellCast += SphereCombatSystem.HandleSpellCast;
+        // SphereEvents.OnSpellCastBegin += SphereCombatSystem.HandleSpellCastBegin;
+        // SphereEvents.OnSpellCastComplete += SphereCombatSystem.HandleSpellCastComplete;
         SphereEvents.OnSpellBlocksMovement += SphereCombatSystem.HandleSpellBlocksMovement;
 
         // Bandage events

@@ -3,6 +3,8 @@ using ModernUO.Serialization;
 using Server.Engines.CannedEvil;
 using Server.Mobiles;
 using Server.Targeting;
+using Server.Modules.Sphere51a.Configuration;
+using Server.Modules.Sphere51a.Extensions;
 
 namespace Server.Items
 {
@@ -33,6 +35,11 @@ namespace Server.Items
 
         public override void OnDoubleClick(Mobile from)
         {
+            if (SphereConfiguration.Enabled && !(Parent == from && from.FindItemOnLayer(Layer) == this))
+            {
+                EquipmentHelper.TryEquipItem(from, this);
+            }
+
             from.SendLocalizedMessage(502464); // Target the animal you wish to herd.
             from.Target = new HerdingTarget();
         }

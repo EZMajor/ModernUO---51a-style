@@ -43,6 +43,8 @@ public class GenericEntityPersistence<T> : GenericPersistence, IGenericEntityPer
     private Serial _lastEntitySerial;
     private readonly Dictionary<Serial, T> _pendingAdd = new();
     private readonly Dictionary<Serial, T> _pendingDelete = new();
+    private static readonly List<Entity> _preInitBuffer = new();
+    private static bool _initialized;
 
     public Dictionary<Serial, T> EntitiesBySerial { get; } = new();
 
@@ -455,7 +457,17 @@ public class GenericEntityPersistence<T> : GenericPersistence, IGenericEntityPer
 
     public override void PostDeserialize()
     {
-        ProcessSafetyQueues();
+        ProcessSafetyQueues();  // Add deserialized entities
+        _initialized = true;
+
+        // Drain buffer after initialization (entities created before persistence was ready)
+        foreach (var e in _preInitBuffer)
+        {
+            AddEntity((T)(object)e);  // Since world state is Loading, this will add to _pendingAdd
+        }
+        _preInitBuffer.Clear();
+
+        ProcessSafetyQueues();  // Now add the buffered entities
     }
 
     public Serial NewEntity
@@ -502,6 +514,11 @@ public class GenericEntityPersistence<T> : GenericPersistence, IGenericEntityPer
         {
             default: // Not Running
                 {
+                    if (!_initialized)
+                    {
+                        _preInitBuffer.Add((Entity)(object)entity);
+                        return;
+                    }
                     throw new Exception($"Added {entity.GetType().Name} before world load.");
                 }
             case WorldState.Saving:

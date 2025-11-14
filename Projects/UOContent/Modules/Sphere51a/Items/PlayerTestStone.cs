@@ -198,6 +198,21 @@ public class PlayerTestStoneGump : Gump
             pm.PlayerTester = true;
         }
 
+        // Clear player's backpack
+        var backpack = from.Backpack;
+        if (backpack != null)
+        {
+            var itemsToDelete = new System.Collections.Generic.List<Item>();
+            foreach (var item in backpack.Items)
+            {
+                itemsToDelete.Add(item);
+            }
+            foreach (var item in itemsToDelete)
+            {
+                item.Delete();
+            }
+        }
+
         // Set all skills to 100.0
         var skills = from.Skills;
         for (var i = 0; i < skills.Length; i++)
@@ -226,7 +241,8 @@ public class PlayerTestStoneGump : Gump
             // Add full plate armor suit in its own bag
             var armorBag = new Bag
             {
-                Name = "Beta Tester Armor"
+                Name = "Beta Tester Armor",
+                Hue = 0x3E9 // Grey
             };
 
             armorBag.AddItem(new PlateHelm());
@@ -240,7 +256,7 @@ public class PlayerTestStoneGump : Gump
             bankBox.AddItem(armorBag);
 
             // Add gold
-            var gold = new Gold(5000);
+            var gold = new Gold(1000000);
             bankBox.AddItem(gold);
 
             // Add spellbook (all spells)
@@ -257,7 +273,8 @@ public class PlayerTestStoneGump : Gump
             // Add reagents bag
             var reagentBag = new Bag
             {
-                Name = "Beta Tester Reagents"
+                Name = "Beta Tester Reagents",
+                Hue = 0x5B5 // Blue
             };
 
             // Add 1000 of each reagent
@@ -300,39 +317,70 @@ public class PlayerTestStoneGump : Gump
 
             bankBox.AddItem(resourcesBag);
 
-            // Add consumables bag
-            var consumablesBag = new Bag
+            // Add potions bag
+            var potionsBag = new Bag
             {
-                Name = "Beta Tester Consumables"
+                Name = "Beta Tester Potions",
+                Hue = 0x2D // Orange
             };
 
-            // Add potions - stacked
-            var healPotions = new HealPotion();
-            healPotions.Amount = 100;
-            consumablesBag.AddItem(healPotions);
+            // Add heal potions - stacked
+            var healPotions = new GreaterHealPotion();
+            healPotions.Amount = 1000;
+            potionsBag.AddItem(healPotions);
 
-            var refreshPotions = new TotalRefreshPotion();
-            refreshPotions.Amount = 100;
-            consumablesBag.AddItem(refreshPotions);
+            // Add mana potions - stacked
+            var manaPotions = new GreaterManaPotion();
+            manaPotions.Amount = 1000;
+            potionsBag.AddItem(manaPotions);
+
+            bankBox.AddItem(potionsBag);
+
+            // Add scrolls bag
+            var scrollsBag = new Bag
+            {
+                Name = "Beta Tester Scrolls",
+                Hue = 0x26 // Red
+            };
 
             // Add scrolls - stacked
             var lightningScrolls = new LightningScroll();
-            lightningScrolls.Amount = 100;
-            consumablesBag.AddItem(lightningScrolls);
+            lightningScrolls.Amount = 250;
+            scrollsBag.AddItem(lightningScrolls);
 
             var greaterHealScrolls = new GreaterHealScroll();
-            greaterHealScrolls.Amount = 100;
-            consumablesBag.AddItem(greaterHealScrolls);
+            greaterHealScrolls.Amount = 250;
+            scrollsBag.AddItem(greaterHealScrolls);
 
             var flamestrikeScrolls = new FlamestrikeScroll();
-            flamestrikeScrolls.Amount = 100;
-            consumablesBag.AddItem(flamestrikeScrolls);
+            flamestrikeScrolls.Amount = 250;
+            scrollsBag.AddItem(flamestrikeScrolls);
 
             var magicReflectScrolls = new MagicReflectScroll();
-            magicReflectScrolls.Amount = 100;
-            consumablesBag.AddItem(magicReflectScrolls);
+            magicReflectScrolls.Amount = 250;
+            scrollsBag.AddItem(magicReflectScrolls);
 
-            bankBox.AddItem(consumablesBag);
+            bankBox.AddItem(scrollsBag);
+
+            // Add weapons bag
+            var weaponsBag = new Bag
+            {
+                Name = "Beta Tester Weapons",
+                Hue = 0x835 // Yellow/Gold
+            };
+
+            weaponsBag.AddItem(new Bardiche());
+            weaponsBag.AddItem(new Halberd());
+            weaponsBag.AddItem(new WarHammer());
+            weaponsBag.AddItem(new Katana());
+            weaponsBag.AddItem(new HammerPick());
+            weaponsBag.AddItem(new Axe());
+            weaponsBag.AddItem(new BattleAxe());
+            weaponsBag.AddItem(new ExecutionersAxe());
+            weaponsBag.AddItem(new QuarterStaff());
+            weaponsBag.AddItem(new BlackStaff());
+
+            bankBox.AddItem(weaponsBag);
         }
 
         from.SendMessage(0x44, "All skills set to maximum and stats boosted!");

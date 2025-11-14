@@ -67,6 +67,9 @@ public class SphereCombatState
     private bool _isBandaging;
     private bool _isUsingWand;
 
+    // Cast delay timing (separate from spell recovery)
+    private long _castDelayEndTime;
+
     // Current actions
     private Spell _currentSpell;
     private BaseWand _currentWand;
@@ -255,6 +258,25 @@ public class SphereCombatState
             _mobile.NextSpellTime = Now + (long)delay.TotalMilliseconds;
         }
     }
+
+    /// <summary>
+    /// Sets the cast delay timer (separate from spell recovery).
+    /// </summary>
+    public void SetCastDelay(TimeSpan delay)
+    {
+        _castDelayEndTime = Now + (long)delay.TotalMilliseconds;
+        SphereConfiguration.DebugLog($"{_mobile.Name} - Cast delay set: {delay.TotalMilliseconds}ms");
+    }
+
+    /// <summary>
+    /// Gets the remaining cast delay in milliseconds.
+    /// </summary>
+    public long GetRemainingCastDelay() => Math.Max(0, _castDelayEndTime - Now);
+
+    /// <summary>
+    /// Checks if the mobile can swing during cast delay (Sphere51a behavior).
+    /// </summary>
+    public bool CanSwingDuringCast() => _castDelayEndTime <= Now;
 
     #endregion
 

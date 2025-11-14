@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "type": "Server.Engines.DuelArena.DuelStoneComponent",
+  "properties": [
+    {
+      "name": "Type",
+      "type": "Server.Engines.DuelArena.DuelType",
+      "rule": "EnumMigrationRule"
+    },
+    {
+      "name": "EntryCost",
+      "type": "int",
+      "rule": "PrimitiveTypeMigrationRule",
+      "ruleArguments": [
+        ""
+      ]
+    },
+    {
+      "name": "LadderEnabled",
+      "type": "bool",
+      "rule": "PrimitiveTypeMigrationRule",
+      "ruleArguments": [
+        ""
+      ]
+    },
+    {
+      "name": "IdleTimeSeconds",
+      "type": "int",
+      "rule": "PrimitiveTypeMigrationRule",
+      "ruleArguments": [
+        ""
+      ]
+    },
+    {
+      "name": "MaxIdleTimeSeconds",
+      "type": "int",
+      "rule": "PrimitiveTypeMigrationRule",
+      "ruleArguments": [
+        ""
+      ]
+    }
+  ]
+}

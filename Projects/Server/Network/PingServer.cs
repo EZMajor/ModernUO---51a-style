@@ -142,6 +142,11 @@ public static class PingServer
 
     public static void Shutdown()
     {
+        if (Listeners == null)
+        {
+            return;
+        }
+
         foreach (var listener in Listeners)
         {
             listener.Close();

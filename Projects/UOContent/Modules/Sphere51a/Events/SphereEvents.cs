@@ -123,6 +123,9 @@ public static class SphereEvents
     public static event EventHandler<Mobile> OnCombatEnter;
     public static event EventHandler<Mobile> OnCombatExit;
 
+    // Spell reflection events
+    public static event Action<Mobile, Mobile, string> OnSpellReflected;
+
     /// <summary>
     /// Raises the weapon swing event.
     /// </summary>
@@ -230,5 +233,26 @@ public static class SphereEvents
     public static void RaiseCombatExit(Mobile mobile)
     {
         OnCombatExit?.Invoke(null, mobile);
+    }
+
+    /// <summary>
+    /// Raises the spell reflected event.
+    /// </summary>
+    public static void RaiseSpellReflected(Mobile originalCaster, Mobile reflector, string spellName)
+    {
+        OnSpellReflected?.Invoke(originalCaster, reflector, spellName);
+    }
+
+    /// <summary>
+    /// Gets diagnostic information about event handler registrations.
+    /// Used for detecting duplicate handlers and integration verification.
+    /// </summary>
+    public static class Diagnostics
+    {
+        public static int SpellCastBeginHandlerCount => OnSpellCastBegin?.GetInvocationList()?.Length ?? 0;
+        public static int SpellCastHandlerCount => OnSpellCast?.GetInvocationList()?.Length ?? 0;
+        public static int SpellCastCompleteHandlerCount => OnSpellCastComplete?.GetInvocationList()?.Length ?? 0;
+        public static int WeaponSwingHandlerCount => OnWeaponSwing?.GetInvocationList()?.Length ?? 0;
+        public static int WeaponSwingCompleteHandlerCount => OnWeaponSwingComplete?.GetInvocationList()?.Length ?? 0;
     }
 }

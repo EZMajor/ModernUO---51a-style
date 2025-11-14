@@ -21,6 +21,7 @@ public enum PotionEffect
     PoisonDeadly,
     Refresh,
     RefreshTotal,
+    ManaGreater,
     HealLesser,
     Heal,
     HealGreater,

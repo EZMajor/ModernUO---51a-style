@@ -2,13 +2,14 @@
 
 ## Table of Contents
 1. [Quick Start](#quick-start)
-2. [Configuration Options](#configuration-options)
-3. [Admin Commands](#admin-commands)
-4. [Performance Monitoring](#performance-monitoring)
-5. [Configuration Tuning](#configuration-tuning)
-6. [Troubleshooting](#troubleshooting)
-7. [Migration Guide](#migration-guide)
-8. [Best Practices](#best-practices)
+2. [Known Limitations](#known-limitations)
+3. [Configuration Options](#configuration-options)
+4. [Admin Commands](#admin-commands)
+5. [Performance Monitoring](#performance-monitoring)
+6. [Configuration Tuning](#configuration-tuning)
+7. [Troubleshooting](#troubleshooting)
+8. [Migration Guide](#migration-guide)
+9. [Best Practices](#best-practices)
 
 ---
 
@@ -50,6 +51,182 @@ Sphere51a Enabled: True
 Integration Mode: CoreHooks
 Provider: WeaponTimingProvider
 ```
+
+---
+
+## Known Limitations
+
+### Current Implementation Status
+
+The Sphere51a module is under active development. The following systems have different implementation statuses:
+
+#### Weapon Combat System ✓ IMPLEMENTED
+- **Status**: Fully functional and tested
+- **Features**: 25ms precision timing, independent swing/spell timers, shadow mode verification
+- **Testing**: Comprehensive test suite with audit logging
+- **Configuration**: Complete weapon timing database (`weapons_timing.json`)
+- **Integration**: Fully integrated with `BaseWeapon.cs` via event hooks
+
+#### Spell System ✗ NOT YET IMPLEMENTED
+- **Status**: Infrastructure exists but core integration is missing
+- **Current State**:
+  - Event system defined (`OnSpellCastBegin`, `OnSpellCastComplete`, etc.)
+  - State tracking implemented (`SphereCombatState` tracks spell timers)
+  - Configuration settings exist but are ignored
+  - Audit logging handlers ready but unused
+  - **CRITICAL**: `Spell.cs` does not have integration hooks to raise events
+- **Impact**:
+  - Spells currently use standard ModernUO timing (NOT Sphere51a)
+  - Spell configuration settings are not applied
+  - Spell tests are DISABLED in `test-config.json`
+  - No spell audit logs are generated
+- **Roadmap**: See [Spell Integration Roadmap](#spell-integration-roadmap) below
+
+### Why Spell Tests Are Disabled
+
+The Sphere51a testing framework includes **active integration verification** that checks whether core game systems properly raise Sphere events.
+
+**The spell timing test will HARD FAIL if enabled** because:
+1. No integration hooks exist in `Spell.cs` to raise `SphereEvents.OnSpellCast*()`
+2. The test actively casts spells and verifies events are raised
+3. When zero events are detected, the test fails with "Integration Missing" error
+4. This is **by design** - tests should not give false confidence
+
+This is a significant improvement over the previous passive testing approach, which could pass even when features didn't work.
+
+### What Works vs What Doesn't
+
+#### What Works (Weapon Combat)
+- ✓ Weapon swing timing with 25ms precision
+- ✓ Independent swing/spell timers
+- ✓ DEX-based swing speed calculations
+- ✓ Shadow mode for production verification
+- ✓ Comprehensive audit logging
+- ✓ Load testing and performance monitoring
+- ✓ All weapon timing tests pass
+
+#### What Doesn't Work Yet (Spells)
+- ✗ Sphere51a spell cast timing
+- ✗ Spell configuration settings (all ignored)
+- ✗ Spell audit logging
+- ✗ Spell timing tests (disabled)
+- ✗ Immediate spell targeting
+- ✗ Target-based mana deduction
+- ✗ Movement during spell casting
+- ✗ Spell/swing timer independence
+
+**Note**: Spells work using standard ModernUO mechanics. They don't crash or break - they just don't use Sphere51a timing.
+
+### Spell Integration Roadmap
+
+Implementation is planned in phases (see project documentation):
+
+**Phase 1**: Testing Framework Hardening ← **CURRENT PHASE**
+- Make tests fail loudly when integration missing
+- Add integration verification before test execution
+- Update documentation to reflect actual status
+- Prevent false confidence from passing tests
+
+**Phase 2**: Spell Flow Documentation
+- Create spell sequence diagrams
+- Document all configuration behaviors
+- Design spell timing database (`spell_timing.json`)
+- Define integration hook points
+
+**Phase 3**: Core Spell Integration
+- Add hooks to `Spell.cs` to raise Sphere events
+- Create `SpellTimingProvider` for timing calculations
+- Implement configuration behaviors
+- Add spell audit logging
+
+**Phase 4**: Testing and Validation
+- Enable spell timing tests
+- Validate against Sphere 51a behavior
+- Performance testing
+- Stress testing with mixed combat/spells
+
+**Phase 5**: Advanced Features (Optional)
+- Spell scroll timing differences
+- Fizzle system overhaul
+- Special spell mechanics
+
+### Testing System Improvements
+
+The testing framework was recently hardened to prevent silent failures:
+
+**Before (Passive Testing)**:
+- Tests read audit logs hoping data exists
+- No data = soft warning, test still "passes"
+- Gave false confidence that spells worked
+
+**After (Active Testing)**:
+- Tests actively cast spells and measure results
+- Integration verification runs before test execution
+- No events raised = HARD FAILURE with clear error message
+- Tests fail fast and loudly when integration missing
+
+This change revealed the spell integration gap that was previously hidden.
+
+### Workarounds for Production
+
+If you need Sphere51a combat on a production shard **now**:
+
+**Option 1: Weapon Combat Only (Recommended)**
+- Enable Sphere51a for weapon timing
+- Leave spells using ModernUO defaults
+- Players get authentic melee combat
+- Spell combat works but uses different timing
+- Clearly communicate this to players
+
+**Option 2: Wait for Full Implementation**
+- Keep Sphere51a disabled
+- Wait for Phase 3 (spell integration) completion
+- Deploy with full feature parity
+
+**Option 3: Contribute**
+- Implementation roadmap is documented
+- Code architecture is extensible
+- Community contributions welcome
+
+### Verifying Integration Status
+
+Administrators can check integration status at any time:
+
+**Command**: `[VerifyIntegration]` *(to be implemented)*
+
+**Or run tests**:
+```bash
+dotnet run --project Projects/Application -- --test
+```
+
+Expected output:
+```
+═══════════════════════════════════════════════════
+  Integration Status Check
+═══════════════════════════════════════════════════
+
+  Weapon Combat: ✓ ACTIVE
+    Events firing correctly
+
+  Spell System:  ✗ NOT IMPLEMENTED
+    Events not raised by spell casting
+
+  ⚠ WARNING: Spell integration not implemented
+    - Spell timing tests will FAIL if enabled
+    - Spell tests are DISABLED in test-config.json
+    - See SPELL_ARCHITECTURE.md for requirements
+
+═══════════════════════════════════════════════════
+```
+
+### Getting Updates
+
+Watch for updates in:
+- GitHub releases
+- `CHANGELOG.md`
+- Commit messages mentioning "Phase 2", "Phase 3", etc.
+
+When spell integration is complete, this section will be updated.
 
 ---
 
@@ -778,6 +955,107 @@ High active count with low actual combat
 2. Verify Mobile.cs has delegate and hook
 3. Rebuild solution
 4. Restart server
+
+---
+
+#### Issue: Equipment won't equip via double-click
+
+**Symptoms**:
+- Double-clicking equipment does nothing
+- Item stays in backpack or on ground
+- No error message displayed
+
+**Diagnosis**:
+1. Check if Sphere51a is enabled:
+   ```
+   [VerifyWeaponTiming
+   ```
+   Look for "Sphere51a Enabled: True"
+
+2. Check distance (for ground items):
+   - Must be within 2 tiles
+   - Use Razor/UOSteam to check exact distance
+
+**Possible Causes & Solutions**:
+
+| Cause | Check | Solution |
+|-------|-------|----------|
+| Sphere51a disabled | Config file | Set `"enableSphere51aStyle": true` |
+| Item out of range | Distance > 2 tiles | Move closer to item |
+| Container locked | Container security | Unlock container or use accessible one |
+| Insufficient stats | Strength/dex requirements | Increase stats or use different equipment |
+| Wrong race | Race restrictions | Use appropriate equipment for race |
+
+**Resolution Steps**:
+1. Verify Sphere51a enabled in `modernuo.json`
+2. For ground items: Stand next to item (1-2 tiles max)
+3. For container items: Ensure container is accessible
+4. Check if item has stat/race requirements
+5. Try equipping from backpack instead
+
+---
+
+#### Issue: Items dropping to ground when equipping
+
+**Symptoms**:
+- New item equips successfully
+- Old item drops to ground instead of going to backpack
+- Message: "You are overweight. The item has been dropped at your feet."
+
+**Diagnosis**:
+- This is **intended behavior** when overweight
+- Check character weight vs max weight
+
+**Resolution**:
+1. **Reduce carried weight**:
+   - Remove items from backpack
+   - Put items in bank or house
+   - Increase Strength stat (increases max weight)
+
+2. **Manage equipment swaps**:
+   - Clear backpack space before equipping new items
+   - Pick up dropped items immediately
+   - Use secure containers for valuable equipment
+
+**Note**: This is authentic UO behavior when overweight. It prevents items from being lost.
+
+---
+
+#### Issue: Two-handed weapon doesn't auto-unequip shield
+
+**Symptoms**:
+- Equipping two-handed weapon doesn't remove shield
+- Shield stays equipped
+- Weapon doesn't equip
+
+**Diagnosis**:
+- Check if weapon is truly two-handed
+- Verify Sphere51a is enabled
+
+**Possible Causes**:
+1. Weapon is actually one-handed (some weapons may appear two-handed but aren't)
+2. Sphere51a equipment system not enabled
+3. Custom weapon with incorrect layer setting
+
+**Resolution**:
+1. Verify weapon layer in code (should be `Layer.TwoHanded`)
+2. Ensure Sphere51a enabled
+3. For custom weapons: Check `Layer` property is set correctly
+4. Try equipping from backpack (not ground)
+
+---
+
+#### Issue: Double-clicking equipped item does nothing
+
+**Symptoms**:
+- Double-clicking worn equipment has no effect
+- Item doesn't unequip
+
+**Resolution**:
+- This is **intended behavior**
+- Use drag-and-drop to unequip items (standard UO behavior)
+- Double-click only works for equipping, not unequipping
+- This matches authentic Sphere 0.51a behavior
 
 ---
 

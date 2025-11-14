@@ -232,7 +232,7 @@ namespace Server.Mobiles
 
         public BlockMountType MountBlockReason => _mountBlock?.MountBlockReason ?? BlockMountType.None;
 
-        public override int MaxWeight => (Core.ML && Race == Race.Human ? 100 : 40) + (int)(3.5 * Str);
+        public override int MaxWeight => PlayerTester ? int.MaxValue : (Core.ML && Race == Race.Human ? 100 : 40) + (int)(3.5 * Str);
 
         public override double ArmorRating
         {

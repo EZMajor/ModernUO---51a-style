@@ -152,6 +152,8 @@ namespace Server.Engines.MLQuests
 
             TargetCommands.Register(new ViewQuestsCommand());
             TargetCommands.Register(new ViewContextCommand());
+
+            EventSink.WorldLoad += InitializeQuests;
         }
 
         public static void Initialize()
@@ -161,18 +163,22 @@ namespace Server.Engines.MLQuests
                 return;
             }
 
-            if (AutoGenerateNew)
+            // Quest generation deferred to WorldLoaded event
+            MLQuestPersistence.EnsureExistence();
+        }
+
+        private static void InitializeQuests()
+        {
+            if (!Enabled || !AutoGenerateNew)
+                return;
+
+            foreach (var quest in Quests.Values)
             {
-                foreach (var quest in Quests.Values)
+                if (quest?.Deserialized == false)
                 {
-                    if (quest?.Deserialized == false)
-                    {
-                        quest.Generate();
-                    }
+                    quest.Generate();
                 }
             }
-
-            MLQuestPersistence.EnsureExistence();
         }
 
         [Usage("MLQuestsInfo"),

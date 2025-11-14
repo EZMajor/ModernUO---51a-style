@@ -66,7 +66,7 @@ public static class ShadowModeVerifier
         {
             var comparison = new TimingComparison
             {
-                Timestamp = Core.TickCount,
+                Timestamp = global::Server.Core.TickCount,
                 MobileSerial = attacker.Serial.ToString(),
                 MobileName = attacker.Name,
                 WeaponId = weapon.ItemID,
@@ -129,13 +129,10 @@ public static class ShadowModeVerifier
         {
             if (providerName == "WeaponTimingProvider")
             {
-                // Use the global timing provider
-                var timingProvider = Combat.WeaponTimingProvider.Instance;
-                if (timingProvider != null)
-                {
-                    var delay = timingProvider.GetAttackDelay(attacker, weapon);
-                    return delay.TotalMilliseconds;
-                }
+                // Create stateless timing provider instance
+                var timingProvider = new Server.Modules.Sphere51a.Combat.WeaponTimingProvider();
+                var delayMs = timingProvider.GetAttackIntervalMs(attacker, weapon);
+                return delayMs;
             }
             else if (providerName == "LegacySphereTimingAdapter")
             {
@@ -214,7 +211,7 @@ public static class ShadowModeVerifier
             if (window == null)
                 return new List<TimingComparison>(_comparisons);
 
-            var cutoffTick = Core.TickCount - (long)window.Value.TotalMilliseconds;
+            var cutoffTick = global::Server.Core.TickCount - (long)window.Value.TotalMilliseconds;
             return _comparisons.Where(c => c.Timestamp >= cutoffTick).ToList();
         }
     }

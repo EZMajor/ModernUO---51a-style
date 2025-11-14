@@ -4,6 +4,10 @@ using Server.Engines.ConPVP;
 using Server.Items;
 using Server.Misc;
 using Server.Mobiles;
+using Server.Modules.Sphere51a.Combat;
+using Server.Modules.Sphere51a.Configuration;
+using Server.Modules.Sphere51a.Events;
+using Server.Modules.Sphere51a.Spells;
 using Server.Spells.Bushido;
 using Server.Spells.Necromancy;
 using Server.Spells.Ninjitsu;
@@ -64,7 +68,12 @@ namespace Server.Spells
 
         public virtual bool BlockedByHorrificBeast => true;
         public virtual bool BlockedByAnimalForm => true;
-        public virtual bool BlocksMovement => IsCasting;
+
+        // SPHERE51A INTEGRATION: Allow movement during cast when configured
+        public virtual bool BlocksMovement =>
+            SphereConfiguration.Enabled && SphereConfiguration.AllowMovementDuringCast
+                ? false
+                : IsCasting;
 
         public virtual bool CheckNextSpellTime => Scroll is not BaseWand;
 
@@ -144,6 +153,15 @@ namespace Server.Spells
             if (Caster.Spell == this)
             {
                 Caster.Spell = null;
+            }
+
+            // SPHERE51A INTEGRATION: Raise spell cast complete event
+            if (SphereConfiguration.Enabled)
+            {
+                var sphereState = SphereCombatState.GetOrCreate(Caster);
+                sphereState?.EndSpellCast();
+
+                SphereEvents.RaiseSpellCastComplete(Caster, this);
             }
 
             Caster.Delta(MobileDelta.Flags); // Remove paralyze
@@ -254,6 +272,32 @@ namespace Server.Spells
             damage = AOS.Scale(damage, (int)(scalar * 100));
 
             return damage / 100;
+        }
+
+        public virtual bool CheckReagents()
+        {
+            if (Scroll != null) return true;
+            if (!Caster.Player) return true;
+            if (AosAttributes.GetValue(Caster, AosAttribute.LowerRegCost) > Utility.Random(100)) return true;
+            if (DuelContext.IsFreeConsume(Caster)) return true;
+
+            // Check without consuming - verify player has enough of each reagent
+            var backpack = Caster.Backpack;
+            if (backpack == null) return false;
+
+            for (int i = 0; i < Info.Reagents.Length; i++)
+            {
+                var reagentType = Info.Reagents[i];
+                var requiredAmount = Info.Amounts[i];
+                var actualAmount = backpack.GetAmount(reagentType);
+
+                if (actualAmount < requiredAmount)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public virtual bool ConsumeReagents() =>
@@ -512,81 +556,113 @@ namespace Server.Spells
             {
                 var requiredMana = ScaleMana(GetMana());
 
-                if (Caster.Mana >= requiredMana)
+                if (Caster.Mana >= requiredMana && CheckReagents())
                 {
                     if (Caster.Spell == null && Caster.CheckSpellCast(this) && CheckCast() &&
                         Caster.Region.OnBeginSpellCast(Caster, this))
                     {
-                        State = SpellState.Casting;
-                        Caster.Spell = this;
-
-                        if (!isWand && RevealOnCast)
+                        // SPHERE51A vs MODERNUO: Completely different casting flows
+                        if (SphereConfiguration.Enabled)
                         {
-                            Caster.RevealingAction();
-                        }
+                            // SPHERE51A: Minimal pre-targeting setup, show cursor immediately
+                            // State, animations, mantra, etc. happen AFTER target selection in SpellTarget.cs
 
-                        SayMantra();
-
-                        var castDelay = GetCastDelay();
-
-                        if (ShowHandMovement && (Caster.Body.IsHuman || Caster.Player && Caster.Body.IsMonster))
-                        {
-                            var count = (int)Math.Ceiling(castDelay.TotalSeconds / AnimateDelay.TotalSeconds);
-
-                            if (count != 0)
+                            if (!isWand && RevealOnCast)
                             {
-                                _animTimer = new AnimTimer(this, count);
-                                _animTimer.Start();
+                                Caster.RevealingAction();
                             }
 
-                            if (Info.LeftHandEffect > 0)
+                            if (Core.ML)
                             {
-                                Caster.FixedParticles(0, 10, 5, Info.LeftHandEffect, EffectLayer.LeftHand);
+                                WeaponAbility.ClearCurrentAbility(Caster);
                             }
 
-                            if (Info.RightHandEffect > 0)
-                            {
-                                Caster.FixedParticles(0, 10, 5, Info.RightHandEffect, EffectLayer.RightHand);
-                            }
-                        }
-
-                        if (ClearHandsOnCast)
-                        {
-                            Caster.ClearHands();
-                        }
-
-                        if (Core.ML)
-                        {
-                            WeaponAbility.ClearCurrentAbility(Caster);
-                        }
-
-                        Caster.Delta(MobileDelta.Flags); // Start paralyze
-
-                        _castTimer = new CastTimer(this, castDelay);
-                        // m_CastTimer.Start();
-
-                        OnBeginCast();
-
-                        if (castDelay > TimeSpan.Zero)
-                        {
-                            _castTimer.Start();
+                            // Show targeting cursor immediately - NO delays, NO animations, NO mantra
+                            OnBeginCast();
+                            OnCast();
                         }
                         else
                         {
-                            _castTimer.Tick();
+                            // MODERNUO: Full pre-cast setup BEFORE showing cursor
+                            State = SpellState.Casting;
+                            Caster.Spell = this;
+
+                            if (!isWand && RevealOnCast)
+                            {
+                                Caster.RevealingAction();
+                            }
+
+                            SayMantra();
+
+                            var castDelay = GetCastDelay();
+
+                            if (ShowHandMovement && (Caster.Body.IsHuman || Caster.Player && Caster.Body.IsMonster))
+                            {
+                                var count = (int)Math.Ceiling(castDelay.TotalSeconds / AnimateDelay.TotalSeconds);
+
+                                if (count != 0)
+                                {
+                                    _animTimer = new AnimTimer(this, count);
+                                    _animTimer.Start();
+                                }
+
+                                if (Info.LeftHandEffect > 0)
+                                {
+                                    Caster.FixedParticles(0, 10, 5, Info.LeftHandEffect, EffectLayer.LeftHand);
+                                }
+
+                                if (Info.RightHandEffect > 0)
+                                {
+                                    Caster.FixedParticles(0, 10, 5, Info.RightHandEffect, EffectLayer.RightHand);
+                                }
+                            }
+
+                            if (ClearHandsOnCast)
+                            {
+                                Caster.ClearHands();
+                            }
+
+                            if (Core.ML)
+                            {
+                                WeaponAbility.ClearCurrentAbility(Caster);
+                            }
+
+                            Caster.Delta(MobileDelta.Flags); // Start paralyze
+
+                            _castTimer = new CastTimer(this, castDelay);
+
+                            OnBeginCast();
+
+                            if (castDelay > TimeSpan.Zero)
+                            {
+                                _castTimer.Start();
+                            }
+                            else
+                            {
+                                _castTimer.Tick();
+                            }
                         }
 
                         return true;
                     }
                 }
-                else if (Caster.NetState?.IsKRClient != true && Caster.NetState?.Version >= ClientVersion.Version70654)
+                else if (Caster.Mana < requiredMana)
                 {
-                    // Insufficient mana. You must have at least ~1_MANA_REQUIREMENT~ Mana to use this spell.
-                    Caster.LocalOverheadMessage(MessageType.Regular, 0x22, 502625, requiredMana.ToString());
+                    // Insufficient mana
+                    if (Caster.NetState?.IsKRClient != true && Caster.NetState?.Version >= ClientVersion.Version70654)
+                    {
+                        // Insufficient mana. You must have at least ~1_MANA_REQUIREMENT~ Mana to use this spell.
+                        Caster.LocalOverheadMessage(MessageType.Regular, 0x22, 502625, requiredMana.ToString());
+                    }
+                    else
+                    {
+                        Caster.LocalOverheadMessage(MessageType.Regular, 0x22, 502625); // Insufficient mana
+                    }
                 }
                 else
                 {
-                    Caster.LocalOverheadMessage(MessageType.Regular, 0x22, 502625); // Insufficient mana
+                    // Insufficient reagents
+                    Caster.LocalOverheadMessage(MessageType.Regular, 0x22, 502630); // More reagents are needed for this spell.
                 }
             }
 
@@ -597,6 +673,31 @@ namespace Server.Spells
 
         public virtual void OnBeginCast()
         {
+        }
+
+        // Public method for Sphere51a to start animations after target selection
+        public void StartCastAnimation(TimeSpan castDelay)
+        {
+            if (ShowHandMovement && (Caster.Body.IsHuman || Caster.Player && Caster.Body.IsMonster))
+            {
+                var count = (int)Math.Ceiling(castDelay.TotalSeconds / AnimateDelay.TotalSeconds);
+
+                if (count != 0)
+                {
+                    _animTimer = new AnimTimer(this, count);
+                    _animTimer.Start();
+                }
+
+                if (Info.LeftHandEffect > 0)
+                {
+                    Caster.FixedParticles(0, 10, 5, Info.LeftHandEffect, EffectLayer.LeftHand);
+                }
+
+                if (Info.RightHandEffect > 0)
+                {
+                    Caster.FixedParticles(0, 10, 5, Info.RightHandEffect, EffectLayer.RightHand);
+                }
+            }
         }
 
         public virtual void GetCastSkills(out double min, out double max)
@@ -683,6 +784,21 @@ namespace Server.Spells
 
         public virtual TimeSpan GetCastDelay()
         {
+            // SPHERE51A INTEGRATION: Use Sphere timing when enabled
+            if (SphereConfiguration.Enabled && SpellTimingProvider.IsInitialized)
+            {
+                var magerySkill = Caster.Skills[CastSkill].Value;
+                var fromScroll = Scroll != null && !(Scroll is BaseWand);
+                var sphereDelayMs = SpellTimingProvider.GetCastDelay(this, magerySkill, fromScroll);
+
+                if (sphereDelayMs > 0)
+                {
+                    return TimeSpan.FromMilliseconds(sphereDelayMs);
+                }
+                // Fall through to ModernUO default if spell not in Sphere system
+            }
+
+            // ORIGINAL MODERNUO LOGIC (unchanged)
             if (Scroll is BaseWand)
             {
                 return Core.ML ? CastDelayBase : TimeSpan.Zero; // TODO: Should FC apply to wands?
@@ -729,6 +845,7 @@ namespace Server.Spells
         public virtual bool CheckSequence()
         {
             var mana = ScaleMana(GetMana());
+            var isSphere51a = SphereConfiguration.Enabled;
 
             if (Caster.Deleted || !Caster.Alive || Caster.Spell != this || State != SpellState.Sequencing)
             {
@@ -740,12 +857,16 @@ namespace Server.Spells
             {
                 DoFizzle();
             }
-            else if (!ConsumeReagents())
+            else if (!isSphere51a && !ConsumeReagents())
             {
+                // Sphere51a: Reagents already consumed at target selection
+                // ModernUO: Consume reagents now
                 Caster.LocalOverheadMessage(MessageType.Regular, 0x22, 502630); // More reagents are needed for this spell.
             }
-            else if (Caster.Mana < mana)
+            else if (!isSphere51a && Caster.Mana < mana)
             {
+                // Sphere51a: Mana already checked and consumed after delay
+                // ModernUO: Check mana now
                 Caster.LocalOverheadMessage(MessageType.Regular, 0x22, 502625); // Insufficient mana for this spell.
             }
             else if (Core.AOS && (Caster.Frozen || Caster.Paralyzed))
@@ -760,7 +881,12 @@ namespace Server.Spells
             }
             else if (CheckFizzle())
             {
-                Caster.Mana -= mana;
+                // Sphere51a: Mana already deducted after cast delay
+                // ModernUO: Deduct mana now
+                if (!isSphere51a)
+                {
+                    Caster.Mana -= mana;
+                }
 
                 if (Scroll is SpellScroll)
                 {
@@ -950,14 +1076,24 @@ namespace Server.Spells
                     m_Spell._castTimer = null;
                     caster.OnSpellCast(m_Spell);
                     caster.Region?.OnSpellCast(caster, m_Spell);
-                    caster.NextSpellTime =
-                        Core.TickCount + (int)m_Spell.GetCastRecovery().TotalMilliseconds; // Spell.NextSpellDelay;
+
+                    // SPHERE51A INTEGRATION: Skip core recovery when Sphere handles it
+                    if (!SphereConfiguration.Enabled)
+                    {
+                        caster.NextSpellTime = Core.TickCount + (int)m_Spell.GetCastRecovery().TotalMilliseconds; // Spell.NextSpellDelay;
+                    }
 
                     caster.Delta(MobileDelta.Flags); // Update paralyze
 
                     var originalTarget = caster.Target;
 
                     m_Spell.OnCast();
+
+                    // SPHERE51A INTEGRATION: Raise spell cast event (when spell takes effect)
+                    if (SphereConfiguration.Enabled)
+                    {
+                        SphereEvents.RaiseSpellCast(caster, m_Spell);
+                    }
 
                     if (caster.Player && caster.Target != originalTarget)
                     {

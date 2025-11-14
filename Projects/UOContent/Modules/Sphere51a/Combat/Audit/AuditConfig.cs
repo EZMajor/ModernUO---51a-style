@@ -113,6 +113,65 @@ public class AuditConfig
     [JsonPropertyName("mobileHistorySize")]
     public int MobileHistorySize { get; set; } = 100;
 
+    #region Magic Audit Configuration (Phase 3)
+
+    /// <summary>
+    /// Enable spell casting audit and verification.
+    /// When enabled, tracks spell timing, resource usage, and fizzles.
+    /// Default: true
+    /// </summary>
+    [JsonPropertyName("enableSpellAudit")]
+    public bool EnableSpellAudit { get; set; } = true;
+
+    /// <summary>
+    /// Track and validate mana consumption for spell casts.
+    /// Compares actual mana spent vs. expected spell cost.
+    /// Default: true
+    /// </summary>
+    [JsonPropertyName("trackManaValidation")]
+    public bool TrackManaValidation { get; set; } = true;
+
+    /// <summary>
+    /// Track reagent consumption and validate reagent requirements.
+    /// WARNING: Performance cost - requires backpack scanning.
+    /// Default: false (opt-in)
+    /// </summary>
+    [JsonPropertyName("trackReagentUsage")]
+    public bool TrackReagentUsage { get; set; } = false;
+
+    /// <summary>
+    /// Log spell fizzles and interruptions.
+    /// Default: true
+    /// </summary>
+    [JsonPropertyName("logFizzles")]
+    public bool LogFizzles { get; set; } = true;
+
+    /// <summary>
+    /// Minimum interval in milliseconds between spell casts to prevent double-casting.
+    /// Set to 0 to disable double-cast detection.
+    /// Default: 0 (disabled)
+    /// </summary>
+    [JsonPropertyName("minCastIntervalMs")]
+    public double MinCastIntervalMs { get; set; } = 0;
+
+    /// <summary>
+    /// Detect and log when two spells are cast in rapid succession (double-cast).
+    /// Uses MinCastIntervalMs threshold (or 400ms default if MinCastIntervalMs = 0).
+    /// Default: true
+    /// </summary>
+    [JsonPropertyName("detectDoublecast")]
+    public bool DetectDoublecast { get; set; } = true;
+
+    /// <summary>
+    /// Validate and log scroll vs. reagent spell casting.
+    /// Tracks whether spells are cast from scrolls or with reagents.
+    /// Default: true
+    /// </summary>
+    [JsonPropertyName("validateScrollUsage")]
+    public bool ValidateScrollUsage { get; set; } = true;
+
+    #endregion
+
     /// <summary>
     /// Validates configuration values and applies corrections if needed.
     /// Called automatically during deserialization.
@@ -162,5 +221,17 @@ public class AuditConfig
             MobileHistorySize = 10;
         else if (MobileHistorySize > 1000)
             MobileHistorySize = 1000;
+
+        // Validate magic audit settings
+        if (MinCastIntervalMs < 0)
+            MinCastIntervalMs = 0;
+        else if (MinCastIntervalMs > 10000)
+            MinCastIntervalMs = 10000;
+
+        // Disable reagent tracking if performance throttled
+        if (AutoThrottleThresholdMs > 0 && AutoThrottleThresholdMs < 5 && TrackReagentUsage)
+        {
+            TrackReagentUsage = false;
+        }
     }
 }

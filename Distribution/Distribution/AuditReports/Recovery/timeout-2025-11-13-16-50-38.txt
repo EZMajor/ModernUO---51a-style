@@ -1,0 +1,19 @@
+Test Timeout Diagnostic Report
+=============================
+Timestamp: 2025-11-13 16:50:38 UTC
+Start Time: 2025-11-13 21:40:38 UTC
+Duration: 00:10:00.1488447
+Scenario: weapon_timing
+Config Path: 
+
+Possible Causes:
+- Infinite loop in test code
+- Deadlock in combat system
+- Memory exhaustion
+- File I/O blocking
+
+Recommendations:
+- Run with --verbose for more details
+- Check Distribution/AuditReports/Logs/ for recent logs
+- Reduce test duration with --duration parameter
+- Run individual scenarios to isolate issues

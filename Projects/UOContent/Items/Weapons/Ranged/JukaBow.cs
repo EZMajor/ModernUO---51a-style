@@ -1,5 +1,7 @@
 using ModernUO.Serialization;
 using Server.Targeting;
+using Server.Modules.Sphere51a.Configuration;
+using Server.Modules.Sphere51a.Extensions;
 
 namespace Server.Items
 {
@@ -24,6 +26,11 @@ namespace Server.Items
 
         public override void OnDoubleClick(Mobile from)
         {
+            if (SphereConfiguration.Enabled && !(Parent == from && from.FindItemOnLayer(Layer) == this))
+            {
+                EquipmentHelper.TryEquipItem(from, this);
+            }
+
             if (IsModified)
             {
                 from.SendMessage("That has already been modified.");

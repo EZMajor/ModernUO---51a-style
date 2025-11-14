@@ -132,6 +132,38 @@ public class VerifyTimingAccuracy
         mobile.SendMessage(status, $"Status: {statusText}");
         mobile.SendMessage(0x59, "═══════════════════════════════════════════════════");
 
+        // Phase 3.1: Spell timing analysis
+        var spellEntries = allEntries
+            .Where(e => e.ActionType == CombatActionTypes.SpellCastComplete && e.ActualDelayMs > 0)
+            .OrderByDescending(e => e.Timestamp)
+            .Take(count)
+            .ToList();
+
+        if (spellEntries.Count > 0)
+        {
+            mobile.SendMessage("");
+            mobile.SendMessage(0x5D, $"Spell Timing (last {spellEntries.Count} casts):");
+
+            var avgSpellVariance = spellEntries.Average(e => Math.Abs(e.VarianceMs));
+            var spellWithin50 = spellEntries.Count(e => Math.Abs(e.VarianceMs) <= 50);
+            var spellAccuracy = (spellWithin50 / (double)spellEntries.Count) * 100.0;
+            var maxSpellVariance = spellEntries.Max(e => Math.Abs(e.VarianceMs));
+
+            mobile.SendMessage($"  Avg Variance: {avgSpellVariance:F1}ms");
+            mobile.SendMessage($"  Max Variance: {maxSpellVariance:F1}ms");
+            mobile.SendMessage($"  Within ±50ms: {spellWithin50} ({spellAccuracy:F1}%)");
+
+            // Check for double-casts
+            var doublecasts = allEntries.Count(e =>
+                e.ActionType == CombatActionTypes.SpellCastStart &&
+                e.GetDetail("DoublecastDetected") is bool dc && dc);
+
+            if (doublecasts > 0)
+            {
+                mobile.SendMessage(0x22, $"  Double-casts Detected: {doublecasts}");
+            }
+        }
+
         // Offer shadow mode comparison if available
         if (ShadowModeVerifier.IsEnabled && ShadowModeVerifier.TotalComparisons > 0)
         {

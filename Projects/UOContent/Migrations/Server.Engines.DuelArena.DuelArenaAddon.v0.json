@@ -1,0 +1,15 @@
+{
+  "version": 0,
+  "type": "Server.Engines.DuelArena.DuelArenaAddon",
+  "properties": [
+    {
+      "name": "DuelStoneComponents",
+      "type": "System.Collections.Generic.List\u003CServer.Engines.DuelArena.DuelStoneComponent\u003E",
+      "rule": "ListMigrationRule",
+      "ruleArguments": [
+        "Server.Engines.DuelArena.DuelStoneComponent",
+        "SerializableInterfaceMigrationRule"
+      ]
+    }
+  ]
+}

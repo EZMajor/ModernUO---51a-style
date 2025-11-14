@@ -137,6 +137,46 @@ public class SphereCombatAudit
             mobile.SendMessage(0x22, "No recent activity.");
         }
 
+        // Phase 3.1: Spell audit statistics
+        if (config.EnableSpellAudit && recentEntries.Count > 0)
+        {
+            mobile.SendMessage("");
+            mobile.SendMessage(0x5D, "Spell Audit:");
+
+            var spellCasts = recentEntries.Count(e => e.ActionType == CombatActionTypes.SpellCastStart);
+            var spellCompletes = recentEntries.Count(e => e.ActionType == CombatActionTypes.SpellCastComplete);
+            var fizzles = recentEntries.Count(e => e.ActionType == CombatActionTypes.SpellFizzle);
+            var doublecasts = recentEntries.Count(e =>
+                e.ActionType == CombatActionTypes.SpellCastStart &&
+                e.GetDetail("DoublecastDetected") is bool dc && dc);
+            var scrollCasts = recentEntries.Count(e =>
+                e.ActionType == CombatActionTypes.SpellCastStart &&
+                e.GetDetail("ScrollCast") is bool sc && sc);
+
+            mobile.SendMessage($"  Spell Casts Started: {spellCasts}");
+            mobile.SendMessage($"  Spell Casts Completed: {spellCompletes}");
+
+            if (fizzles > 0)
+            {
+                mobile.SendMessage(0x22, $"  Fizzles Logged: {fizzles}");
+            }
+
+            if (doublecasts > 0)
+            {
+                mobile.SendMessage(0x22, $"  Double-casts Detected: {doublecasts}");
+            }
+
+            if (scrollCasts > 0)
+            {
+                mobile.SendMessage($"  Scroll Casts: {scrollCasts}");
+            }
+
+            if (config.MinCastIntervalMs > 0)
+            {
+                mobile.SendMessage($"  Min Cast Interval: {config.MinCastIntervalMs}ms");
+            }
+        }
+
         mobile.SendMessage("");
         mobile.SendMessage(0x59, "═══════════════════════════════════════════════════");
         mobile.SendMessage(0x5D, "Commands: [SphereCombatAudit <status|flush|clear|export>]");

@@ -449,6 +449,9 @@ public static class World
 
     public static void ExitSerializationThreads()
     {
+        if (_threadWorkers == null)
+            return;
+
         for (var i = 0; i < _threadWorkers.Length; i++)
         {
             _threadWorkers[i]?.Exit();

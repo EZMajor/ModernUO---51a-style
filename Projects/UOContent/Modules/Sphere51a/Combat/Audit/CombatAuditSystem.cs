@@ -274,7 +274,7 @@ public static class CombatAuditSystem
 
     private static void OnSpellCastBegin(object sender, SpellCastEventArgs e)
     {
-        if (!ShouldRecord(AuditLevel.Standard))
+        if (!ShouldRecord(AuditLevel.Standard) || !Config.EnableSpellAudit)
             return;
 
         var entry = new CombatLogEntry(e.Caster, CombatActionTypes.SpellCastStart, EffectiveLevel);
@@ -284,6 +284,38 @@ public static class CombatAuditSystem
             entry.AddDetail("SpellId", SpellRegistry.GetRegistryNumber(e.Spell));
             entry.AddDetail("SpellName", e.Spell.Name);
             entry.ExpectedDelayMs = e.Spell.CastDelayBase.TotalMilliseconds;
+
+            // Phase 3.1: Scroll detection
+            if (Config.ValidateScrollUsage && e.Spell.Scroll != null)
+            {
+                entry.AddDetail("ScrollCast", true);
+                entry.AddDetail("ScrollType", e.Spell.Scroll.GetType().Name);
+            }
+
+            // Phase 3.1: Double-cast detection
+            if (Config.DetectDoublecast)
+            {
+                var lastCastTime = GetTimeSinceLastAction(e.Caster, CombatActionTypes.SpellCastStart);
+                var threshold = Config.MinCastIntervalMs > 0 ? Config.MinCastIntervalMs : 400;
+
+                if (lastCastTime > 0 && lastCastTime < threshold)
+                {
+                    entry.AddDetail("DoublecastDetected", true);
+                    entry.AddDetail("TimeSinceLastCast", lastCastTime);
+                    entry.AddDetail("ThresholdMs", threshold);
+
+                    if (EffectiveLevel >= AuditLevel.Detailed)
+                    {
+                        logger.Warning(
+                            "[SpellAudit] Double-cast detected: {Name} - {Spell}, interval {Interval:F1}ms (threshold {Threshold}ms)",
+                            e.Caster.Name,
+                            e.Spell.Name,
+                            lastCastTime,
+                            threshold
+                        );
+                    }
+                }
+            }
         }
 
         entry.AddDetail("Cancelled", e.Cancelled);
@@ -294,7 +326,7 @@ public static class CombatAuditSystem
 
     private static void OnSpellCastComplete(object sender, SpellCastEventArgs e)
     {
-        if (!ShouldRecord(AuditLevel.Standard))
+        if (!ShouldRecord(AuditLevel.Standard) || !Config.EnableSpellAudit)
             return;
 
         var entry = new CombatLogEntry(e.Caster, CombatActionTypes.SpellCastComplete, EffectiveLevel);

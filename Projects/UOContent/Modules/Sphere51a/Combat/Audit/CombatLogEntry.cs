@@ -179,4 +179,13 @@ public static class CombatActionTypes
 
     public const string ShadowComparison = "ShadowComparison";
     public const string PerformanceMetric = "PerformanceMetric";
+
+    // Magic audit action types (Phase 3)
+    public const string SpellFizzle = "SpellFizzle";
+    public const string SpellResourceCheck = "SpellResourceCheck";
+    public const string SpellInterrupt = "SpellInterrupt";
+    public const string SpellDoublecast = "SpellDoublecast";
+    public const string SpellManaDrain = "SpellManaDrain";
+    public const string SpellReagentConsume = "SpellReagentConsume";
+    public const string CrossSystemConflict = "CrossSystemConflict";
 }

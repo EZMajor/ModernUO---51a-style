@@ -88,6 +88,18 @@ public static class Core
     }
 #nullable restore
 
+    private static bool _headlessMode;
+
+    /// <summary>
+    /// When true, Core.Setup() will skip starting network servers and the event loop.
+    /// This allows test frameworks and other tools to initialize the world without running the game loop.
+    /// </summary>
+    public static bool HeadlessMode
+    {
+        get => _headlessMode;
+        set => _headlessMode = value;
+    }
+
     public static Assembly ApplicationAssembly { get; set; }
     public static Assembly Assembly { get; set; }
 
@@ -336,8 +348,11 @@ public static class Core
 
         logger.Information("Shutting down");
 
-        World.WaitForWriteCompletion();
-        World.ExitSerializationThreads();
+        if (World.Running)
+        {
+            World.WaitForWriteCompletion();
+            World.ExitSerializationThreads();
+        }
         PingServer.Shutdown();
         TcpServer.Shutdown();
 
@@ -447,10 +462,103 @@ public static class Core
 
         AssemblyHandler.Invoke("Initialize");
 
-        TcpServer.Start();
-        PingServer.Start();
+        if (!HeadlessMode)
+        {
+            TcpServer.Start();
+            PingServer.Start();
+            EventSink.InvokeServerStarted();
+            RunEventLoop();
+        }
+        else
+        {
+            // Headless mode: initialization complete, return control to caller
+            // Network servers and event loop are skipped
+            EventSink.InvokeServerStarted();
+        }
+    }
+
+    /// <summary>
+    /// Minimal setup for testing environments. Skips heavy initialization like world loading,
+    /// network servers, and file I/O operations while maintaining essential systems for combat testing.
+    /// </summary>
+    public static void SetupMinimal(Assembly applicationAssembly, Process process)
+    {
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+
+        Process = process;
+        ApplicationAssembly = applicationAssembly;
+        Assembly = Assembly.GetAssembly(typeof(Core));
+        Thread = Thread.CurrentThread;
+        LoopContext = new EventLoopContext();
+        SynchronizationContext.SetSynchronizationContext(LoopContext);
+
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
+        AppDomain.CurrentDomain.AssemblyResolve += AssemblyHandler.AssemblyResolver;
+
+        Console.OutputEncoding = Encoding.UTF8;
+        Thread.Name = "Core Thread (Minimal)";
+
+        if (BaseDirectory.Length > 0)
+        {
+            Directory.SetCurrentDirectory(BaseDirectory);
+        }
+
+        Utility.PushColor(ConsoleColor.Cyan);
+        Console.WriteLine("ModernUO - Minimal Test Setup");
+        Utility.PopColor();
+
+        Console.CancelKeyPress += Console_CancelKeyPressed;
+
+        // LibDeflate is not thread safe, so we need to create a new instance for each thread
+        var standard = Deflate.Standard;
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => standard.Dispose();
+
+        // Load minimal configuration (skip data directories that require file access)
+        ServerConfiguration.Load();
+
+        logger.Information("Running on {Framework} (Minimal Mode)", RuntimeInformation.FrameworkDescription);
+
+        var assemblyPath = Path.Join(BaseDirectory, AssembliesConfiguration);
+
+        // Load UOContent.dll
+        var assemblyFiles = JsonConfig.Deserialize<List<string>>(assemblyPath)?.ToArray();
+        if (assemblyFiles == null)
+        {
+            throw new JsonException($"Failed to deserialize {assemblyPath}.");
+        }
+
+        for (var i = 0; i < assemblyFiles.Length; i++)
+        {
+            assemblyFiles[i] = Path.Join(BaseDirectory, "Assemblies", assemblyFiles[i]);
+        }
+
+        AssemblyHandler.LoadAssemblies(assemblyFiles);
+
+        // Skip serialization verification in minimal mode (too slow)
+        _itemCount = 0;
+        _mobileCount = 0;
+
+        _now = DateTime.UtcNow;
+        _firstTick = _tickCount = GetTimestamp();
+
+        // Initialize essential timer system
+        Timer.Init(_tickCount);
+
+        // Configure assemblies (essential for test framework)
+        AssemblyHandler.Invoke("Configure");
+
+        // SKIP: TileMatrixLoader.LoadTileMatrix(); // File I/O intensive
+        // SKIP: RegionJsonSerializer.LoadRegions(); // File I/O intensive
+        // SKIP: World.Load(); // Heavy world loading
+
+        // Initialize assemblies (essential for Sphere51a and test framework)
+        AssemblyHandler.Invoke("Initialize");
+
+        // Always headless in minimal mode - no network servers or event loop
         EventSink.InvokeServerStarted();
-        RunEventLoop();
+
+        logger.Information("Minimal test setup complete");
     }
 
     public static void RunEventLoop()
